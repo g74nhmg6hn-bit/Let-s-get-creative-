@@ -15,7 +15,7 @@ Makhi grew up in the back of Gaddy's Gym, his family's boxing gym on 5th Avenue,
 - **Never Back Down:** below 30% health he hits 25% harder.
 - **Look picker:** skin tone, hairstyle and gear colors, set from his profile on the title screen.
 
-His sprite is 48px with 12 animation frames (idle, run, punch, hurt, victory, jump, slam), drawn in code.
+His sprite is hand-placed pixel art (about 30×41 px) with 12 animation frames (idle, run, punch, hurt, victory, jump, slam). It is built from hand-drawn layers (body, legs, near arm) with palette ramps, so skin tone, gear color and hairstyle are recolors of the same art.
 
 ## How it plays
 

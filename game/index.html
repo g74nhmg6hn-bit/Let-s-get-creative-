@@ -396,128 +396,273 @@ const ICONS = {
 };
 
 // ---------------------------------------------------------------- Makhi Gaddy
+// Hand-placed pixel art, built from layers (body, legs, near arm) so every animation frame
+// reuses the same drawn parts. Letters map to palette ramps; '.' is transparent.
 const HERO_CELL = 48, HERO_COLS = 4, HERO_ROWS = 3;
 const HERO_FRAMES = ['idle0', 'idle1', 'run0', 'run1', 'run2', 'run3', 'punch0', 'punch1', 'hurt', 'victory', 'jump', 'slam'];
-const SKINS = ['#f1c8a0', '#d9a477', '#b07a4f', '#8a5a36', '#5e3a22'];
-const HAIRS = [['fade', 'Fade'], ['twists', 'Twists'], ['buzz', 'Buzz'], ['locs', 'Locs']];
-const GEAR = [
-  { name: 'Crimson', top: '#1c1824', trim: '#ffc23a', band: '#e0303f', pants: '#2e3346', shoes: '#f4f4f4', accent: '#e0303f' },
-  { name: 'Royal', top: '#161a30', trim: '#f4f4f4', band: '#2f6bff', pants: '#262a3c', shoes: '#f4f4f4', accent: '#2f6bff' },
-  { name: 'Venom', top: '#14201a', trim: '#7dff6a', band: '#3ad65a', pants: '#232a26', shoes: '#26262c', accent: '#7dff6a' },
-  { name: 'Gold', top: '#2a2116', trim: '#16121a', band: '#ffc23a', pants: '#3a3020', shoes: '#ffc23a', accent: '#16121a' },
+const SKIN_RAMPS = [
+  ['#8a4a3a', '#c47e62', '#e8b08a', '#f8d4b0'],
+  ['#6e3a28', '#a8684a', '#cf9468', '#e8b88a'],
+  ['#5a3020', '#8e5436', '#b8774c', '#d89a68'],
+  ['#4e2a1e', '#7a4630', '#a2603e', '#c98a5a'],
+  ['#2e1812', '#4e2c1e', '#6e402a', '#8e5a3c'],
 ];
+const SKINS = SKIN_RAMPS.map((r) => r[2]);
+const HAIRS = [['twists', 'High top'], ['fade', 'Fade'], ['buzz', 'Buzz'], ['locs', 'Locs']];
+const GEAR = [
+  { name: 'Crimson', band: ['#7a1426', '#c4243a', '#ff5a5f'], top: ['#0f0e17', '#24223a', '#3a3958'], trim: ['#ffc23a', '#b8721c'], pants: ['#151829', '#29304a', '#404a6c'] },
+  { name: 'Royal', band: ['#14286e', '#2f5ee0', '#6a9aff'], top: ['#0f0e17', '#24223a', '#3a3958'], trim: ['#e8e8f0', '#9a9ab0'], pants: ['#1c2030', '#30364c', '#4a5270'] },
+  { name: 'Venom', band: ['#145a28', '#2fb04a', '#7dff8a'], top: ['#0e140f', '#1e2a22', '#33463a'], trim: ['#7dff6a', '#3a9a3a'], pants: ['#141a16', '#26302a', '#3a4a40'] },
+  { name: 'Gold', band: ['#8a5a10', '#e0a020', '#ffd86a'], top: ['#1a140c', '#2e2416', '#4a3a24'], trim: ['#f4f0e8', '#a8a0a0'], pants: ['#2a2216', '#40341f', '#5a4a2e'] },
+];
+const MAKHI_BASE_PAL = {
+  K: '#1a1020', H: '#1e1724', J: '#3d3046', W: '#f2ece4', M: '#4a1a24',
+  V: '#f2eef5', v: '#a8a0b4', e: '#8a879e', E: '#d9d7e6', F: '#ffffff', o: '#2a2333',
+};
 let look = { skin: 3, hair: 0, gear: 0 };
 try {
   const saved = JSON.parse(localStorage.getItem('afterhours-look') || 'null');
-  if (saved) look = { skin: clamp(saved.skin | 0, 0, SKINS.length - 1), hair: clamp(saved.hair | 0, 0, HAIRS.length - 1), gear: clamp(saved.gear | 0, 0, GEAR.length - 1) };
+  if (saved) look = { skin: clamp(saved.skin | 0, 0, SKIN_RAMPS.length - 1), hair: clamp(saved.hair | 0, 0, HAIRS.length - 1), gear: clamp(saved.gear | 0, 0, GEAR.length - 1) };
 } catch (e) { /* defaults */ }
 
-// Joint positions in a 48px cell, facing right. n = neck, h = hip, arms/legs = [root, joint, end].
-const POSES = {
-  idle0:   { n: [24, 17], h: [23, 30], fa: [[29, 19], [33, 24], [33, 15]], ba: [[19, 19], [17, 25], [22, 20]], fl: [[26, 30], [29, 37], [31, 44]], bl: [[20, 30], [17, 37], [15, 44]] },
-  run0:    { n: [26, 17], h: [23, 30], fa: [[30, 19], [27, 25], [24, 29]], ba: [[21, 19], [25, 24], [29, 21]], fl: [[25, 30], [30, 35], [34, 40]], bl: [[21, 30], [19, 37], [14, 42]] },
-  run1:    { n: [26, 18], h: [23, 31], fa: [[30, 20], [31, 26], [33, 24]], ba: [[21, 20], [21, 26], [24, 27]], fl: [[25, 31], [27, 38], [27, 45]], bl: [[21, 31], [22, 36], [19, 41]] },
-  run2:    { n: [26, 17], h: [23, 30], fa: [[30, 19], [35, 23], [38, 19]], ba: [[21, 19], [18, 25], [16, 28]], fl: [[25, 30], [22, 37], [16, 42]], bl: [[21, 30], [27, 35], [31, 40]] },
-  run3:    { n: [26, 18], h: [23, 31], fa: [[30, 20], [27, 26], [25, 28]], ba: [[21, 20], [24, 25], [27, 23]], fl: [[25, 31], [23, 36], [20, 41]], bl: [[21, 31], [26, 38], [26, 45]] },
-  punch0:  { n: [22, 17], h: [23, 30], fa: [[27, 19], [25, 25], [25, 17]], ba: [[18, 19], [17, 25], [21, 21]], fl: [[26, 30], [30, 37], [33, 44]], bl: [[20, 30], [16, 38], [13, 44]] },
-  punch1:  { n: [27, 17], h: [24, 30], fa: [[32, 19], [38, 18], [44, 17]], ba: [[22, 19], [20, 25], [25, 22]], fl: [[27, 30], [32, 37], [35, 44]], bl: [[21, 30], [16, 38], [12, 44]], mouth: 'yell', bigFist: true },
-  hurt:    { n: [20, 18], h: [22, 30], hd: [-2, 1], fa: [[25, 20], [29, 25], [33, 28]], ba: [[16, 20], [13, 25], [11, 22]], fl: [[24, 30], [26, 37], [28, 44]], bl: [[20, 30], [17, 37], [16, 44]], mouth: 'ouch' },
-  victory: { n: [24, 17], h: [23, 30], fa: [[29, 19], [35, 12], [38, 4]], ba: [[19, 19], [16, 25], [20, 29]], fl: [[26, 30], [30, 37], [33, 44]], bl: [[20, 30], [16, 37], [13, 44]], mouth: 'grin', bigFist: true },
-  jump:    { n: [24, 14], h: [23, 27], fa: [[29, 16], [35, 10], [38, 4]], ba: [[19, 16], [15, 10], [12, 4]], fl: [[26, 27], [30, 32], [28, 38]], bl: [[20, 27], [18, 33], [15, 38]], mouth: 'yell' },
-  slam:    { n: [25, 23], h: [23, 34], fa: [[30, 25], [34, 32], [36, 42]], ba: [[20, 25], [22, 33], [27, 42]], fl: [[26, 34], [31, 39], [34, 45]], bl: [[20, 34], [16, 40], [13, 45]], mouth: 'yell', bigFist: true },
+const BODY = [
+".......KKKKKKKK",
+"......KHJHJHJHHK",
+".....KHHJHHJHHJHK",
+"....KHHHHHHHHHHHHK",
+"....KHHHHHHHHHHHHHK",
+"KK..KQQQQQQQQQQQQQK",
+"KRKKKRRRRRRRRRRRRRK",
+".KRqRKqqqqqqqqqqqqK",
+"..KRqKHHHBCCCCCDDCK",
+"...KKKHHBKKKCCKKKCK",
+".....KHHBCWKCCCWKCDK",
+".....KHABCCCCCCCCCDK",
+".....KHAABCCCCCCCBBK",
+"......KBBBCCCCCBMCK",
+"......KBBBBCCCCCCK",
+".......KKBBBBBBKK",
+".........KBBBK",
+"...KKKKKKBBBBBKKKK",
+"..KBBBBKKyBBByKKK",
+".KBBBBBKTTyByTTTUK",
+".KBBBBKTTTTTTyTTUK",
+".KABBBKTTTTTyyTTUK",
+".KABBKTTTTTyyyTTUK",
+".KAABKTTTTTyyTTTUK",
+".KAABKtTTTTyTTTTUK",
+"..KAAKtTTTTTTTTUUK",
+"..KAKKttTTTTTTTUK",
+"..KAKRRRKtTTTTUUK",
+"...KRRRRVVKTTTTUK",
+"....KKKKKKpPPPPpK",
+];
+const ARM_GUARD = [
+".KKKK.......",
+"KCDDCK.KKKKK",
+"KCDDCCKRQQRRK",
+"KCCDCCKVVVVRK",
+"KBCCCCKRRRRqK",
+"KBCCCKCDDCKK",
+"KBBCCKCDCCK",
+"KBBCKBCDCK",
+".KBBKBCCK",
+".KBBKBBK",
+"..KKKKK",
+];
+const LEGS_STANCE = [
+"..KpPPPPPPPPPOK",
+".KpPPPPPPPPPPPOK",
+".KpPPPpKKpPPPPOK",
+"KpPPPpK..KpPPPOOK",
+"KpPPPK....KpPPPOK",
+"KpPPpK.....KPPPOK",
+"KpPPK......KpPPPOK",
+"KpPPK.......KPPOOK",
+"KpppK.......KpPPOK",
+"KeRREK......KeERRFK",
+"KeEFFFK.....KeEEFFFK",
+"KoooooK.....KoooooooK",
+];
+const ARM_PUNCH = [
+".KKKKK......KKKKK",
+"KCDDDCKKKKKKRQQRRK",
+"KCCDDDCDDDCRVVVVRK",
+"KBCCCCCCCCCRRRRRqK",
+"KBBCCBBBBBBKRRRqK",
+".KBBKKKKKKKKKKKK",
+"..KK",
+];
+const ARM_RAISE = [
+"......KKKKK",
+".....KRQQRK",
+".....KVVVVK",
+".....KRRRqK",
+"......KRRqK",
+".....KCDCK",
+".....KCDCCK",
+"....KCDCK",
+"....KCDCCK",
+"...KCCCK",
+"..KCDDCK",
+".KCDDCCK",
+"KCCDCCK",
+"KBCCCK",
+"KBBCK",
+".KKK",
+];
+const ARM_DOWN = [
+".KKKK",
+"KCDDCK",
+"KCDDCCK",
+"KCCDCCK",
+"KBCCCCK",
+".KBCDCK",
+".KBCDCK",
+"..KBCDCK",
+"..KBCCCK",
+"..KRRRRK",
+".KRQQRRK",
+".KVVVVRK",
+".KRRRRqK",
+"..KKKKK",
+];
+const ARM_SWING_F = [
+".KKKK",
+"KCDDCK..KKKK",
+"KCDDCCKKRQRRK",
+"KCCDCCDCVVVRK",
+"KBCCCCCCRRRqK",
+"KBBCCBBKKKKK",
+".KBBKKK",
+"..KK",
+];
+const ARM_SWING_B = [
+"..KKKK",
+".KCDDCK",
+".KCDDCCK",
+"KCCDCCK",
+"KBCCCK",
+"KBCCK",
+"KBBCK",
+"KRRRK",
+"KVVVK",
+"KRRqK",
+".KKK",
+];
+const LEGS_RUN_A = [
+"....KpPPPPPPPPOK",
+"...KpPPPPPPPPPPOK",
+"..KpPPPpKKKpPPPPOK",
+".KpPPpK....KpPPPPOK",
+"KpPPpK......KpPPPPOK",
+"KpPpK........KpPPPOK",
+"KppK..........KPPPOK",
+"KeEK..........KpPPOK",
+"KeRK.........KeERRFK",
+"KoK..........KeEEFFFK",
+".K...........KoooooooK",
+];
+const LEGS_RUN_B = [
+"..KpPPPPPPPPOK",
+".KpPPPPPPPPPPOK",
+".KpPPPpKPPPPPOK",
+"KpPPPK.KpPPPOK",
+"KpppK..KpPPPOK",
+"KeERK...KPPPOK",
+"KooK....KpPPOK",
+".KK.....KpPPOK",
+".......KeERRFK",
+".......KeEEFFK",
+".......KooooooK",
+];
+const LEGS_LUNGE = [
+"....KpPPPPPPPPOK",
+"...KpPPPPPPPPPPOK",
+"..KpPPpKKKKpPPPPOK",
+".KpPPK.....KpPPPPOK",
+"KpPPK.......KpPPPOK",
+"KpPK.........KpPPOK",
+"KpPK.........KpPPPOK",
+"KppK..........KpPPOK",
+"KeEK.........KeERRFK",
+"KeRRK........KeEEFFFK",
+"KooooK.......KoooooooK",
+];
+const LEGS_TUCK = [
+"..KpPPPPPPPPOK",
+".KpPPPPPPPPPPOK",
+"KpPPPPPPPPPPPPOK",
+"KpPPPKKKKKpPPPOK",
+"KpPPK....KpPPPOK",
+".KeEEK....KeERRFK",
+".KeRRK....KeEEFFK",
+".KoooK....KooooooK",
+];
+const LEGS_CROUCH = [
+"....KpPPPPPPPPPOK",
+"..KKpPPPPPPPPPPPOKK",
+".KpPPPpKKKKKKpPPPPOK",
+"KpPPpK.......KpPPPPOK",
+"KpPK..........KpPPPOK",
+"KppK...........KpPPOK",
+"KeEEK.........KeERRFK",
+"KeRRFK........KeEEFFFK",
+"KoooooK.......KoooooooK",
+];
+const FACES = {
+  yell: { 13: "......KBBBCCCCMWWMK", 14: "......KBBBBCCCMMMK" },
+  grin: { 13: "......KBBBCCCCWWWCK", 14: "......KBBBBCCCCMCK" },
+  ouch: { 10: ".....KHHBCKKCCCKKKCDK", 13: "......KBBBCCCCCMMCK" },
 };
-{
-  const up = (p) => ({ ...p, n: [p.n[0], p.n[1] + 1], fa: p.fa.map(([x, y]) => [x, y + 1]), ba: p.ba.map(([x, y]) => [x, y + 1]) });
-  POSES.idle1 = up(POSES.idle0);
+const mirror = (grid) => { const w = Math.max(...grid.map((r) => r.length)); return grid.map((r) => r.padEnd(w, '.').split('').reverse().join('')); };
+// [body x,y], [legs grid, x, y], [arm grid, x, y], face
+const MAKHI_FRAMES = {
+  idle0:   { b: [6, 6], l: [LEGS_STANCE, 8, 35], a: [ARM_GUARD, 21, 23] },
+  idle1:   { b: [6, 7], l: [LEGS_STANCE, 8, 35], a: [ARM_GUARD, 21, 24] },
+  run0:    { b: [7, 6], l: [LEGS_RUN_A, 6, 36], a: [ARM_SWING_B, 20, 23] },
+  run1:    { b: [7, 7], l: [LEGS_RUN_B, 9, 36], a: [ARM_GUARD, 22, 24] },
+  run2:    { b: [7, 6], l: [mirror(LEGS_RUN_A), 6, 36], a: [ARM_SWING_F, 22, 23] },
+  run3:    { b: [7, 7], l: [mirror(LEGS_RUN_B), 9, 36], a: [ARM_GUARD, 22, 24] },
+  punch0:  { b: [5, 6], l: [LEGS_LUNGE, 6, 36], a: [ARM_GUARD, 18, 24] },
+  punch1:  { b: [8, 6], l: [LEGS_LUNGE, 7, 36], a: [ARM_PUNCH, 23, 23], f: 'yell' },
+  hurt:    { b: [4, 7], l: [LEGS_STANCE, 7, 35], a: [ARM_SWING_B, 17, 24], f: 'ouch' },
+  victory: { b: [6, 6], l: [LEGS_STANCE, 8, 35], a: [ARM_RAISE, 21, 10], f: 'grin' },
+  jump:    { b: [6, 2], l: [LEGS_TUCK, 8, 31], a: [ARM_RAISE, 21, 6], f: 'yell' },
+  slam:    { b: [6, 12], l: [LEGS_CROUCH, 5, 38], a: [ARM_DOWN, 21, 29], f: 'yell' },
+};
+
+const HAIR_ROWS = {
+  fade: { 0: '', 1: '.......KKKKKKKK', 2: '.....KKHHHHJJJHKK' },
+  buzz: { 0: '', 1: '', 2: '.....KKKKKKKKKKKK', 3: '....KAAABAABAAABAK', 4: '....KABAAABAAABAAAK' },
+};
+const LOCS = ['...KK', '..KHJK', '.KHJHK', '.KHJHK', 'KHJHK', 'KHJHK', 'KHHK', 'KHJK', 'KHK', '.K'];
+
+function makhiPalette(lk) {
+  const s = SKIN_RAMPS[lk.skin], g = GEAR[lk.gear];
+  return { ...MAKHI_BASE_PAL, A: s[0], B: s[1], C: s[2], D: s[3], q: g.band[0], R: g.band[1], Q: g.band[2], t: g.top[0], T: g.top[1], U: g.top[2], y: g.trim[0], Y: g.trim[1], p: g.pants[0], P: g.pants[1], O: g.pants[2] };
 }
-
-function drawMakhi(g, pose, lk, frameNo) {
-  const skin = SKINS[lk.skin], gear = GEAR[lk.gear], hairStyle = HAIRS[lk.hair][0];
-  const hair = '#16111c', hairHi = '#3a3046';
-  const skinD = shade(skin, 0.78), skinDD = shade(skin, 0.6), skinL = shade(skin, 1.12);
-  const P = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); };
-  const seg = (a, b, w, c) => {
-    const n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 2) + 1;
-    for (let i = 0; i <= n; i++) { const t = i / n; P(a[0] + (b[0] - a[0]) * t - w / 2, a[1] + (b[1] - a[1]) * t - w / 2, w, w, c); }
-  };
-  // Draw the shadow side first, then the lit side offset up-left, for a one-pixel rim of shading.
-  const limb = (a, b, w, c, cd) => { seg([a[0] + 0.6, a[1] + 0.6], [b[0] + 0.6, b[1] + 0.6], w, cd); seg([a[0] - 0.4, a[1] - 0.4], [b[0] - 0.4, b[1] - 0.4], w - 1, c); };
-
-  const arm = ([sh, el, hd], back) => {
-    const c = back ? skinD : skin, cd = back ? skinDD : skinD;
-    const band = back ? shade(gear.band, 0.72) : gear.band, bandD = shade(gear.band, back ? 0.5 : 0.65);
-    P(sh[0] - 3, sh[1] - 2, 7, 5, c);
-    if (!back) P(sh[0] - 2, sh[1] - 2, 4, 1, skinL);
-    limb(sh, el, 6, c, cd);
-    limb(el, hd, 5, c, cd);
-    const wr = [el[0] + (hd[0] - el[0]) * 0.45, el[1] + (hd[1] - el[1]) * 0.45];
-    limb(wr, hd, 5, band, bandD);
-    const f = pose.bigFist && !back ? 6 : 5;
-    P(hd[0] - f / 2, hd[1] - f / 2, f, f, band);
-    P(hd[0] - f / 2, hd[1], f, 1, back ? '#b8b0a8' : '#f4f0e8');
-    P(hd[0] + f / 2 - 1, hd[1] - f / 2, 1, f, bandD);
-  };
-  const leg = ([hip, knee, foot], back) => {
-    const pc = back ? shade(gear.pants, 0.75) : gear.pants, pd = shade(gear.pants, back ? 0.5 : 0.65);
-    limb(hip, knee, 7, pc, pd);
-    limb(knee, foot, 6, pc, pd);
-    const sc = back ? shade(gear.shoes, 0.78) : gear.shoes;
-    P(foot[0] - 3, foot[1] - 1, 8, 3, sc);
-    P(foot[0] - 3, foot[1] + 2, 8, 1, '#2a2430');
-    P(foot[0] - 1, foot[1], 3, 1, back ? shade(gear.accent, 0.8) : gear.accent);
-  };
-  const n = pose.n, h = pose.h;
-  // hood bunched behind the neck
-  P(n[0] - 7, n[1] - 3, 7, 5, shade(gear.top, 1.25)); P(n[0] - 7, n[1] - 3, 7, 1, gear.trim);
-  arm(pose.ba, true);
-  leg(pose.bl, true);
-  // torso: broad shoulders tapering to the waist
-  for (let y = n[1]; y <= h[1]; y++) {
-    const t = (y - n[1]) / (h[1] - n[1]);
-    const w = Math.round(lerp(16, 11, t)), cx = lerp(n[0], h[0], t), x0 = Math.round(cx - w / 2);
-    P(x0, y, w, 1, gear.top);
-    P(x0 + w - 2, y, 2, 1, shade(gear.top, 0.7));
-    P(x0 + 1, y, 1, 1, shade(gear.top, 1.5));
+function blitGrid(g, grid, ox, oy, pal) {
+  for (let y = 0; y < grid.length; y++) {
+    const row = grid[y];
+    for (let x = 0; x < row.length; x++) {
+      const ch = row[x];
+      if (ch === '.' || ch === ' ') continue;
+      g.fillStyle = pal[ch] || '#ff00ff';
+      g.fillRect(ox + x, oy + y, 1, 1);
+    }
   }
-  P(n[0] - 7, n[1] + 1, 1, 5, gear.trim); P(n[0] + 6, n[1] + 1, 1, 5, gear.trim);
-  P(n[0] - 1, n[1], 3, 2, skin); P(n[0], n[1] + 2, 1, 1, skin);
-  P(n[0] - 2, n[1], 1, 2, gear.trim); P(n[0] + 2, n[1], 1, 2, gear.trim); P(n[0] - 1, n[1] + 2, 1, 1, gear.trim); P(n[0] + 1, n[1] + 2, 1, 1, gear.trim); P(n[0], n[1] + 3, 1, 1, gear.trim);
-  const ex = Math.round(lerp(n[0], h[0], 0.5)) + 1, ey = Math.round(lerp(n[1], h[1], 0.5));
-  P(ex, ey - 2, 2, 1, gear.trim); P(ex - 1, ey - 1, 2, 1, gear.trim); P(ex - 1, ey, 3, 1, gear.trim); P(ex, ey + 1, 2, 1, gear.trim); P(ex + 1, ey + 2, 1, 1, gear.trim);
-  P(Math.round(h[0] - 6), h[1] - 1, 12, 2, shade(gear.pants, 0.55));
-  leg(pose.fl, false);
-  // head
-  const hd = pose.hd || [0, 0];
-  const hx = n[0] - 5 + hd[0], hy = n[1] - 13 + hd[1];
-  P(hx + 3, hy + 10, 5, 4, skinD);
-  P(hx + 1, hy + 1, 9, 10, skin); P(hx, hy + 3, 1, 6, skin); P(hx + 10, hy + 3, 1, 7, skin); P(hx + 2, hy + 11, 8, 1, skin);
-  P(hx, hy + 3, 2, 6, skinD); P(hx + 3, hy + 11, 7, 1, skinD);
-  P(hx + 2, hy + 5, 2, 3, skinD); P(hx + 2, hy + 6, 1, 1, skinDD);
-  P(hx + 11, hy + 6, 1, 2, skin); P(hx + 10, hy + 8, 1, 1, skinD);
-  const mouth = pose.mouth || 'set';
-  if (mouth === 'ouch') { P(hx + 6, hy + 6, 2, 1, hair); P(hx + 9, hy + 6, 1, 1, hair); }
-  else { P(hx + 6, hy + 6, 2, 2, '#f4f0e8'); P(hx + 7, hy + 6, 1, 2, '#16111c'); P(hx + 9, hy + 6, 1, 2, '#16111c'); }
-  P(hx + 5, hy + 4, 2, 1, hair); P(hx + 7, hy + 5, 1, 1, hair); P(hx + 9, hy + 5, 2, 1, hair);
-  if (mouth === 'grin') { P(hx + 7, hy + 9, 3, 1, '#f4f0e8'); P(hx + 7, hy + 10, 3, 1, skinDD); }
-  else if (mouth === 'yell') { P(hx + 7, hy + 9, 3, 2, '#3a1018'); P(hx + 7, hy + 9, 3, 1, '#f4f0e8'); }
-  else if (mouth === 'ouch') P(hx + 7, hy + 9, 2, 2, '#3a1018');
-  else P(hx + 7, hy + 9, 3, 1, skinDD);
-  if (hairStyle === 'fade') {
-    P(hx + 1, hy - 1, 10, 3, hair); P(hx, hy, 2, 4, hair); P(hx + 1, hy + 4, 1, 2, shade(skin, 0.45)); P(hx + 3, hy - 1, 5, 1, hairHi);
-  } else if (hairStyle === 'twists') {
-    P(hx + 1, hy, 10, 2, hair); P(hx, hy + 1, 2, 4, hair);
-    for (let i = 0; i < 6; i++) { P(hx + i * 2 - 1, hy - 3 + (i % 2), 2, 3, hair); P(hx + i * 2 - 1, hy - 3 + (i % 2), 1, 1, hairHi); }
-  } else if (hairStyle === 'buzz') {
-    P(hx + 1, hy, 10, 2, shade(skin, 0.42)); P(hx, hy + 1, 2, 3, shade(skin, 0.42)); P(hx + 4, hy, 1, 1, shade(skin, 0.6)); P(hx + 8, hy + 1, 1, 1, shade(skin, 0.6));
-  } else {
-    P(hx + 1, hy - 1, 10, 3, hair); P(hx - 1, hy + 1, 2, 10, hair); P(hx + 1, hy + 2, 2, 9, hair); P(hx - 3, hy + 2, 2, 8, hair);
-    P(hx - 1, hy + 2, 1, 7, hairHi); P(hx - 3, hy + 3, 1, 5, hairHi); P(hx + 3, hy - 1, 5, 1, hairHi);
-  }
-  // headband with tails that ripple between frames
-  const wave = frameNo % 2;
-  P(hx, hy + 2, 12, 2, gear.band); P(hx, hy + 3, 12, 1, shade(gear.band, 0.72));
-  P(hx - 3, hy + 2 + wave, 3, 2, gear.band); P(hx - 6, hy + 3, 3, 2, gear.band); P(hx - 9, hy + 3 + (1 - wave), 3, 2, shade(gear.band, 0.8));
-  arm(pose.fa, false);
+}
+function drawMakhi(g, name, lk) {
+  const fr = MAKHI_FRAMES[name], pal = makhiPalette(lk), hair = HAIRS[lk.hair][0];
+  const body = BODY.slice();
+  if (HAIR_ROWS[hair]) for (const [r, row] of Object.entries(HAIR_ROWS[hair])) body[r] = row;
+  if (hair === 'buzz') for (let r = 3; r <= 12; r++) body[r] = body[r].replace(/H/g, 'A').replace(/J/g, 'B');
+  if (fr.f) for (const [r, row] of Object.entries(FACES[fr.f])) body[r] = row;
+  blitGrid(g, fr.l[0], fr.l[1], fr.l[2], pal);
+  blitGrid(g, body, fr.b[0], fr.b[1], pal);
+  if (hair === 'locs') blitGrid(g, LOCS, fr.b[0] + 1, fr.b[1] + 8, pal);
+  blitGrid(g, fr.a[0], fr.a[1], fr.a[2], pal);
 }
 
 const heroAtlas = document.createElement('canvas');
@@ -529,8 +674,7 @@ function buildHero() {
   HERO_FRAMES.forEach((name, i) => {
     const c = document.createElement('canvas'); c.width = c.height = HERO_CELL;
     const cg = c.getContext('2d');
-    drawMakhi(cg, POSES[name], look, i);
-    outline(cg, HERO_CELL, HERO_CELL);
+    drawMakhi(cg, name, look);
     g.drawImage(c, (i % HERO_COLS) * HERO_CELL, Math.floor(i / HERO_COLS) * HERO_CELL);
   });
   if (heroTex) heroTex.needsUpdate = true;
@@ -931,7 +1075,7 @@ shadows.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 shadows.frustumCulled = false;
 scene.add(shadows);
 
-const HERO_SCALE = 2.5;
+const HERO_SCALE = 2.8;
 heroTex = new THREE.CanvasTexture(heroAtlas);
 heroTex.colorSpace = THREE.SRGBColorSpace;
 heroTex.magFilter = THREE.NearestFilter; heroTex.minFilter = THREE.NearestFilter; heroTex.generateMipmaps = false;
@@ -1704,7 +1848,7 @@ function buildLookPicker() {
   };
   mk($('pickSkin'), SKINS, 'skin', (b, c, i) => { b.className = 'swatch'; b.style.background = c; b.setAttribute('aria-label', `Skin tone ${i + 1}`); });
   mk($('pickHair'), HAIRS, 'hair', (b, [, name]) => { b.className = 'chip'; b.textContent = name; });
-  mk($('pickGear'), GEAR, 'gear', (b, gr) => { b.className = 'swatch'; b.style.background = `linear-gradient(135deg, ${gr.band} 50%, ${gr.top} 50%)`; b.setAttribute('aria-label', `${gr.name} gear`); b.title = gr.name; });
+  mk($('pickGear'), GEAR, 'gear', (b, gr) => { b.className = 'swatch'; b.style.background = `linear-gradient(135deg, ${gr.band[1]} 50%, ${gr.top[1]} 50%)`; b.setAttribute('aria-label', `${gr.name} gear`); b.title = gr.name; });
 }
 buildLookPicker();
 drawHeroFrame($('titleHero'), 'idle0');
