@@ -78,3 +78,8 @@ tests/
 pip install -r requirements-dev.txt
 python -m pytest
 ```
+
+## Other projects in this repo
+
+- `game/`: **Afterhours**, a mobile zombie survival prototype
+- `neon-knockout/`: **Neon Knockout**, a single-file neon beat 'em up for the browser. Open `neon-knockout/dist/index.html` to play; see `neon-knockout/CLAUDE.md` for the project guide

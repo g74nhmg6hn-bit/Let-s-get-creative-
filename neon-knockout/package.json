@@ -1,0 +1,18 @@
+{
+  "name": "neon-knockout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Neon Knockout - an original 2D neon beat 'em up for the browser (single-file build, no external assets)",
+  "type": "module",
+  "scripts": {
+    "build": "node build.cjs",
+    "serve": "npx --yes http-server dist -p 3000 -c-1",
+    "test": "npm run build && node test/play.mjs",
+    "test:ui": "npm run build && node test/ui.mjs",
+    "test:perf": "npm run build && node test/perf.mjs",
+    "shots": "npm run build && node test/zoom.mjs && node test/fx.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

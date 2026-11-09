@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#05030a">
+<title>Neon Knockout</title>
+<style>
+html,body{margin:0;height:100%;background:#05030a;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;font-family:monospace}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#screen{position:relative}
+#game{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#crt{position:absolute;inset:0;pointer-events:none;display:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.22) 0,rgba(0,0,0,.22) 1px,transparent 1px,transparent 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+.crt #crt{display:block}
+#touch{position:fixed;inset:0;display:none;pointer-events:none}
+.touch-on #touch{display:block}
+#tleft{position:absolute;left:0;top:18%;bottom:0;width:45%;pointer-events:auto}
+#stick{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid rgba(45,226,230,.45);background:rgba(45,226,230,.08);display:none}
+#knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(45,226,230,.45);border:2px solid rgba(255,255,255,.5)}
+#stickhint{position:absolute;left:7%;bottom:9%;width:100px;height:100px;border-radius:50%;border:2px dashed rgba(45,226,230,.3);color:rgba(45,226,230,.55);font:bold 11px monospace;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.tb{position:absolute;width:15vmin;height:15vmin;max-width:84px;max-height:84px;min-width:52px;min-height:52px;border-radius:50%;pointer-events:auto;display:flex;align-items:center;justify-content:center;font:bold 12px monospace;color:#fff;background:rgba(255,42,109,.22);border:2px solid rgba(255,42,109,.7);box-sizing:border-box;text-shadow:0 1px 0 #000}
+.tb.on{background:rgba(255,42,109,.6)}
+.tb.c{background:rgba(45,226,230,.18);border-color:rgba(45,226,230,.7)}
+.tb.c.on{background:rgba(45,226,230,.55)}
+.tb.y{background:rgba(249,200,14,.15);border-color:rgba(249,200,14,.7)}
+.tb.y.on{background:rgba(249,200,14,.5)}
+.tb.sm{width:11vmin;height:11vmin;min-width:42px;min-height:42px;font-size:10px}
+#tpause{position:absolute;right:2%;top:3%;width:44px;height:36px;pointer-events:auto;border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font:bold 14px monospace;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)}
+#rotate{position:fixed;inset:0;background:#05030a;color:#2de2e6;display:none;align-items:center;justify-content:center;flex-direction:column;font:bold 16px monospace;text-align:center;z-index:9;padding:20px}
+#rotate b{color:#ff2a6d;font-size:22px;margin-bottom:10px}
+@media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="screen"><canvas id="game" width="480" height="270"></canvas><div id="crt"></div></div></div>
+<div id="touch">
+  <div id="tleft"><div id="stickhint">MOVE</div><div id="stick"><div id="knob"></div></div></div>
+  <div class="tb" data-a="light" style="right:17vmin;bottom:5vmin">HIT</div>
+  <div class="tb" data-a="heavy" style="right:2vmin;bottom:17vmin">HEAVY</div>
+  <div class="tb c" data-a="jump" style="right:2vmin;bottom:2vmin">JUMP</div>
+  <div class="tb c" data-a="dodge" style="right:32vmin;bottom:2vmin">ROLL</div>
+  <div class="tb y sm" data-a="grab" style="right:19vmin;bottom:23vmin">GRAB</div>
+  <div class="tb y sm" data-a="pick" style="right:31vmin;bottom:19vmin">PICK</div>
+  <div id="tpause">II</div>
+</div>
+<div id="rotate"><b>ROTATE YOUR PHONE</b>Neon Knockout plays in landscape.</div>
+<script>
+/*__GAME__*/
+</script>
+</body>
+</html>
