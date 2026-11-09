@@ -15,14 +15,24 @@ The owner is Brad, a solo developer. He's not a deep coder, so explain changes i
 |---|---|
 | `00_core.js` | Constants (virtual resolution 480x270, FLOOR=184, DEPTH=74), helpers, settings in localStorage (`nk_settings`), difficulty table `DIFFS`, and the **input layer** (keyboard, mouse, gamepad, touch buttons and stick). Each tick, `I.poll()` fills `I.p[action]` (pressed this tick), `I.held` and `I.move` |
 | `10_audio.js` | Web Audio synthesis: `AU.sfx(name)` sound effects, and a step-sequencer music engine with `SONGS` (title, street, garage, boss, win). The audio unlocks on the first user gesture |
-| `20_gfx.js` | 5x7 bitmap font (`text`, `neon`), **character rigs** (`RIGS`, pose library `AP`, `targetPose`, `drawRig`), props and pickups, particles (`P`, `sparks`, `hitFX`, `ghost`) |
+| `20_gfx.js` | 5x7 bitmap font (`text`, `neon`), **character rigs** (`RIGS`, pose library `AP`, `targetPose`), props and pickups, particles (`P`, `sparks`, `hitFX`, `ghost`) |
+| `22_rig.js` | The character renderer `drawRig()`: color ramps, palettes (`PAL`), costume materials (`MAT`), body builds (`BUILD`), pixel heads (`HEADS`) |
 | `30_bg.js` | Procedural parallax backgrounds for each theme (`street`, `garage`, `roof`) plus live layers: neon signs, flicker, rain, lights |
 | `40_game.js` | Game data and logic: `LEVELS` (waves and props), `TYPES` (enemy stats), `ATK` (every attack's frames, damage, knockback, hit-stop), `damage()`, player controller, enemy AI, boss AI, projectiles, level and wave flow, results and rank |
 | `50_ui.js` | Scenes (title, how to play, settings, scores, credits, play, results), menus, pause, HUD, `render()` |
 | `60_main.js` | Fixed 60 Hz timestep loop, `resize()`, and the `window.NK` test hooks |
 
 ## How characters are drawn
-Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, torso, arms, head) posed by joint angles (`P0()` keys: `ln` lean, `cr` crouch, `rot` body rotation, `fa1/fa2` front arm, `ba1/ba2` back arm, `fl1/fl2` front leg, `bl1/bl2` back leg). Every frame, `targetPose(a)` picks a pose and the current pose eases toward it. `drawRig()` stamps chunky pixel limbs with a 1px outline, a shaded side and a neon rim light (`RIM`, set per theme). It also adds springy secondary parts (`SEC`: hair, jacket tail, scarf, hood, cape) and facial expressions (`exprOf`). Attack poses live in `AP[attackName] = [windup, strike]`.
+Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, torso, arms, head) posed by joint angles (`P0()` keys: `ln` lean, `cr` crouch, `rot` body rotation, `fa1/fa2` front arm, `ba1/ba2` back arm, `fl1/fl2` front leg, `bl1/bl2` back leg). Every frame, `targetPose(a)` picks a pose and the current pose eases toward it. Attack poses live in `AP[attackName] = [windup, strike]`. Rig sizes and base colors are in `RIGS` (`20_gfx.js`); all rigs are scaled by 1.35.
+
+`drawRig()` lives in `22_rig.js`. It rasterizes each body part pixel by pixel into an offscreen buffer, then copies it to the screen:
+- **Parts** are tapered capsules (`rcap`) with lighting from the upper front, using 5-tone color ramps (`RA()`: line, shadow, base, light, highlight, with shadows shifted toward purple and highlights toward warm yellow).
+- **Costume details** come from per-character material functions in `MAT` (stripes, belts, hoodie pocket and logo, armor plates, knee pads, knife straps, suit lapels, buttons and chain). A material gets `u` (pixels along the part), `v` (-1..1 across it, positive = front or up) and the shaded level, and returns `M(ramp, level)`.
+- **Body shape** for each character is set in `BUILD` (how thick the thighs, shins, arms and torso are).
+- **Heads** are hand-drawn pixel sprites in `HEADS` (facing right), with expression variants (`angry`, `hurt`, `happy`) that swap rows. `exprOf(a)` picks the expression.
+- **Springy parts** (`SEC` in `20_gfx.js`: ponytail, jacket tail, hood, scarf, cape) are drawn with the materials in `SECM`.
+- **Finishing pass** (`rend`): a 1px dark outline around the silhouette, a darker inner line wherever a part overlaps one behind it, and a neon rim light (`RIM`, set per stage theme) on the back edge.
+- `npm run test:chars` saves close-up lineups of every character in several poses to `test/shots/80-chars-*.png` (set `POSES=idle,hurt,...`).
 
 ## Combat model (key facts)
 - An attack in `ATK` has `dur` (total frames), `a0..a1` (active frames), `dmg`, `kb`, `launch`, `knock`, `gb` (guard break), `hs` (hit-stop frames), `rch` (reach) and `st` (forward step).
@@ -34,7 +44,7 @@ Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, tor
 ## Testing (self-play bot)
 - `npm test` builds the game, then `test/play.mjs` loads it headlessly in Playwright. A bot plays every stage and the boss, retries after deaths, saves screenshots to `test/shots/`, and prints stage times, HP, score, deaths and move stats (`NK.ST`). Set `DIFF=0|1|2` to test Easy, Normal or Hard.
 - `npm run test:ui`: menus, settings saving, pause, mouse, a **mocked gamepad**, and a phone-landscape touch test.
-- `npm run test:perf`: render time per frame for each stage (currently about 1–2 ms).
+- `npm run test:perf`: render time per frame for each stage (currently about 1–4 ms; the boss stage is the heaviest).
 - Set `CHROME=/path/to/chrome` if Playwright's bundled Chromium isn't installed.
 - Test hooks: `NK.manual=true` stops the real-time loop, `NK.step(n)` advances n ticks, `NK.render()`, `NK.bot` (runs after input polling), `NK.G` (game state).
 
@@ -46,7 +56,6 @@ Last balance check: on Normal the bot clears both stages and loses to the boss a
 - Pixel-crisp rendering: round coordinates, no smoothing, and draw text with the bitmap font only.
 
 ## Ideas / next steps
-- Give each enemy type a stronger silhouette of its own (bulkier grunt, lankier Needle, more heavily armored Riot Wall).
 - Sprite Fusion MCP (a tilemap editor) is configured for this repo in `.mcp.json` at the repo root (Claude Code asks you to approve it the first time). Possible use: hand-built tile layouts for the stage backgrounds, replacing the code-generated ones in `30_bg.js`. First check what its tools can do and what format they export.
 - More content: a stage between the garage and the rooftop, more enemy types, co-op.
 - Published preview (Claude artifact): https://claude.ai/artifact/V2YHdGzJ3yWaAdpXgP3YPN
