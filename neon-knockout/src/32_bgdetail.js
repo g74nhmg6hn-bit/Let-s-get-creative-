@@ -44,8 +44,9 @@ function shopWindow(c,x,y,w,h){R(c,x,y,w,h,'#0e0a1a');R(c,x+1,y+1,w-2,h-2,'#1234
  R(c,x+1,y+h-8,w-2,7,'#184a58');
  for(let k=0;k<w;k+=14)A(c,.5,()=>seg2(c,x+3+k,y+2,x+12+k,y+16,'#9ff0ff'));       // reflections
  R(c,x+(w>>1),y,1,h,'#0e0a1a');R(c,x,y+h-1,w,2,'#3a2a5a')}
-function door(c,x,y){R(c,x,y,18,44,'#0e0a1a');R(c,x+1,y+1,16,43,'#2a1d40');R(c,x+3,y+3,12,18,'#26405a');R(c,x+3,y+3,12,1,'#3d6a8a');
- A(c,.6,()=>seg2(c,x+5,y+4,x+10,y+12,'#8fd8ff'));R(c,x+3,y+24,12,8,'#22163a');R(c,x+4,y+25,10,6,'#2e2050');R(c,x+14,y+22,2,3,'#f9c80e');R(c,x-2,y+43,22,2,'#4a3a6a')}
+function door(c,x,y){const h=FLOOR-y,w=26;R(c,x-2,y-3,w+4,3,'#4a3a6a');R(c,x,y,w,h,'#0e0a1a');R(c,x+1,y+1,w-2,h-1,'#2a1d40');R(c,x+3,y+3,w-6,h*.48,'#26405a');R(c,x+3,y+3,w-6,1,'#3d6a8a');
+ A(c,.6,()=>{seg2(c,x+5,y+5,x+12,y+18,'#8fd8ff');seg2(c,x+8,y+5,x+15,y+18,'#5fb8df')});R(c,x+3,y+h*.55,w-6,h*.36,'#22163a');R(c,x+4,y+h*.55+1,w-8,h*.36-2,'#2e2050');
+ R(c,x+w-6,y+h*.5,2,6,'#f9c80e');R(c,x+w-6,y+h*.5,1,6,'#fff09a');R(c,x+3,y+h*.5,w-6,1,'#1a1030');R(c,x-3,FLOOR-2,w+6,2,'#4a3a6a')}
 function poster(c,x,y){const w=rri(8,12),h=rri(11,15),col=rpick(['#ff2a6d','#2de2e6','#f9c80e','#b45cff','#e9ddf5']);
  R(c,x,y,w,h,col);R(c,x+1,y+1,w-2,4,shd(col,-.45));R(c,x+1,y+h-4,w-2,1,shd(col,-.4));R(c,x+1,y+h-2,w-4,1,shd(col,-.4));
  R(c,x+w-3,y+h-3,3,3,shd(col,-.25));A(c,.3,()=>R(c,x,y,w,h,'#1a0f2a'))}
@@ -55,9 +56,13 @@ function graffiti(c,x,y){const col=rpick(NEONS),n=rri(3,5);A(c,.55,()=>{let px=x
 function streetLamp(c,x){R(c,x-3,FLOOR-2,7,3,'#2a2240');R(c,x-1,40,3,FLOOR-40,'#0e0818');R(c,x,40,1,FLOOR-40,'#5a4e78');
  R(c,x-1,40,14,2,'#0e0818');R(c,x,40,13,1,'#5a4e78');R(c,x+9,42,8,3,'#0e0818');R(c,x+10,43,6,2,'#ffe9a8');R(c,x+11,45,4,1,'#fff6d0');
  A(c,.10,()=>{for(let k=0;k<30;k++)R(c,x+13-k*.6,46+k,1+k*1.2,1,'#ffe9a8')})}
-function hydrant(c,x){const y=FLOOR+2;R(c,x-3,y-11,7,12,OUT);R(c,x-2,y-10,5,11,'#c2283a');R(c,x-2,y-10,2,11,'#e8485a');R(c,x-4,y-7,9,2,'#a01a2a');R(c,x-1,y-12,3,2,'#c2283a');R(c,x-3,y,7,1,'#5a1a22')}
-function trashBags(c,x){const y=FLOOR+3;for(let i=0;i<3;i++){const bx=x+i*6-(i===2?9:0),by=y-(i===2?5:0);ell(c,bx,by-4,5,4,'#0a0814');ell(c,bx,by-4,4,3,'#1e1a2e');R(c,bx-2,by-6,2,1,'#3a3450');R(c,bx,by-9,1,2,'#0a0814')}}
-function newsBox(c,x){const y=FLOOR+2;R(c,x-1,y-15,12,16,OUT);R(c,x,y-14,10,14,'#1f6a8a');R(c,x+1,y-12,8,5,'#cfe8f0');R(c,x+2,y-11,6,1,'#5a6a7a');R(c,x+2,y-9,4,1,'#5a6a7a');R(c,x,y-14,10,1,'#3a9aba')}
+function hydrant(c,x){const y=FLOOR+3;R(c,x-5,y-19,11,20,OUT);R(c,x-4,y-18,9,19,'#c2283a');R(c,x-4,y-18,3,19,'#e8485a');R(c,x+3,y-18,2,19,'#8a1a28');
+ R(c,x-7,y-13,15,4,OUT);R(c,x-6,y-12,13,2,'#a01a2a');R(c,x-6,y-12,13,1,'#e8485a');R(c,x-3,y-22,7,4,OUT);R(c,x-2,y-21,5,3,'#c2283a');R(c,x-1,y-21,2,1,'#ff8a9a');
+ R(c,x-1,y-9,3,3,'#8a1a28');R(c,x-5,y-2,11,2,'#5a1a22')}
+function trashBags(c,x){const y=FLOOR+3;for(let i=0;i<3;i++){const bx=x+i*10-(i===2?15:0),by=y-(i===2?8:0);ell(c,bx,by-7,9,7,'#0a0814');ell(c,bx,by-7,8,6,'#1e1a2e');ell(c,bx+2,by-6,5,4,'#16121f');
+ R(c,bx-4,by-11,3,1,'#4a4462');R(c,bx-3,by-10,2,1,'#3a3450');R(c,bx-1,by-15,2,3,'#0a0814');R(c,bx-2,by-16,4,1,'#0a0814')}}
+function newsBox(c,x){const y=FLOOR+2;R(c,x-1,y-25,18,26,OUT);R(c,x,y-24,16,24,'#1f6a8a');R(c,x,y-24,16,2,'#3a9aba');R(c,x+12,y-22,3,22,'#16506a');
+ R(c,x+2,y-20,11,8,'#cfe8f0');R(c,x+3,y-19,9,1,'#5a6a7a');R(c,x+3,y-17,6,1,'#5a6a7a');R(c,x+3,y-15,8,1,'#5a6a7a');R(c,x+5,y-10,6,2,'#0e3a4a');R(c,x+1,y-1,3,2,OUT);R(c,x+12,y-1,3,2,OUT)}
 function cables(c,width){for(let x=rri(40,120);x<width;x+=rri(140,260)){const w=rri(90,170),y0=rri(10,26),sag=rri(8,18),col=rnd()<.5?'#0c0718':'#140c24';
  for(let i=0;i<=w;i++){const t=i/w;R(c,x+i,y0+sag*4*t*(1-t)|0,1,1,col)}
  if(rnd()<.4){const t=.5,px=x+w*t|0,py=y0+sag|0;R(c,px-1,py,3,6,'#0c0718');R(c,px,py+1,1,4,rpick(['#f9c80e','#ff2a6d']))}}}
@@ -89,7 +94,16 @@ function garageWallDetail(c,ww){
  for(let x=rri(40,90);x<ww;x+=rri(150,260)){R(c,x-1,57,5,5,'#0c0c12');R(c,x,58,3,3,'#c2283a');R(c,x+1,58,1,1,'#ff6a7a')}               // valves
  for(let x=rri(30,100);x<ww;x+=rri(200,320)){R(c,x,120,14,10,'#0c0c12');R(c,x+1,121,12,8,'#d0d0d8');R(c,x+3,123,8,1,'#c2283a');R(c,x+3,125,6,1,'#22222d');R(c,x+3,127,7,1,'#22222d')} // notices
  // wheel stops and car detail pass over the stalls
- for(let xx=20;xx<ww;xx+=92){R(c,xx+18,180,30,3,'#0c0c12');R(c,xx+19,180,28,2,'#b8a040');R(c,xx+19,180,28,1,'#e0c860')}}
+ for(let xx=20;xx<ww;xx+=140){R(c,xx+40,180,40,3,'#0c0c12');R(c,xx+41,180,38,2,'#b8a040');R(c,xx+41,180,38,1,'#e0c860')}}
+function drawCar(c,cx,cy,col){const hi=shd(col,.3),lo=shd(col,-.35),lo2=shd(col,-.55);
+ R(c,cx-1,cy-44,106,36,OUT);R(c,cx,cy-43,104,34,col);R(c,cx+20,cy-62,60,20,OUT);R(c,cx+21,cy-61,58,19,col);
+ R(c,cx,cy-43,104,3,hi);R(c,cx+21,cy-61,58,2,hi);R(c,cx,cy-14,104,5,lo);R(c,cx,cy-10,104,2,lo2);
+ R(c,cx+25,cy-58,23,14,'#152434');R(c,cx+51,cy-58,24,14,'#152434');seg2(c,cx+28,cy-57,cx+35,cy-46,'#4a7a9a');seg2(c,cx+31,cy-57,cx+38,cy-46,'#36607e');seg2(c,cx+54,cy-57,cx+61,cy-46,'#4a7a9a');
+ R(c,cx+49,cy-58,2,14,lo);R(c,cx+23,cy-41,1,28,lo);R(c,cx+51,cy-41,1,28,lo);R(c,cx+78,cy-41,1,24,lo);R(c,cx+42,cy-33,6,2,lo2);R(c,cx+70,cy-33,6,2,lo2);
+ R(c,cx+77,cy-50,5,4,lo);R(c,cx+100,cy-37,4,5,'#ff3b3b');R(c,cx+101,cy-36,2,2,'#ff9a9a');R(c,cx,cy-37,4,5,'#ffe9a8');R(c,cx,cy-36,2,2,'#ffffff');
+ R(c,cx+42,cy-22,20,7,'#0c0c12');R(c,cx+43,cy-21,18,5,'#e8e8d8');R(c,cx+46,cy-19,12,1,'#3a3a46');
+ for(const wx of [cx+20,cx+84]){ell(c,wx,cy-9,10,9,'#06060a');ell(c,wx,cy-9,9,8,'#141418');ell(c,wx,cy-9,5,5,'#6a6a7a');ell(c,wx,cy-9,3,3,'#9a9aaa');R(c,wx-2,cy-11,2,1,'#e0e0ea');ell(c,wx,cy-17,12,3,lo2)}
+ A(c,.3,()=>R(c,cx-3,cy-2,110,3,'#000000'))}
 function carDetail(c,cx,cy,col){
  const hi=shd(col,.3),lo=shd(col,-.35);
  R(c,cx,cy-26,64,2,hi);R(c,cx+13,cy-37,36,2,hi);R(c,cx,cy-8,64,2,lo);R(c,cx+32,cy-25,1,17,lo);R(c,cx+14,cy-25,1,17,lo);  // body shading, door lines

@@ -12,7 +12,8 @@
     "test:perf": "npm run build && node test/perf.mjs",
     "shots": "npm run build && node test/zoom.mjs && node test/fx.mjs",
     "test:chars": "npm run build && node test/chars.mjs",
-    "test:stages": "npm run build && node test/stages.mjs"
+    "test:stages": "npm run build && node test/stages.mjs",
+    "test:heads": "npm run build && node test/heads.mjs"
   },
   "devDependencies": {
     "playwright": "^1.48.0"

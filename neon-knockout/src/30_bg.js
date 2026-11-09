@@ -28,22 +28,22 @@ function makeStreet(width){
  while(x<width){
   if(rnd()<.2&&x>120&&n>1){const gw=rri(34,50);R(c,x,0,gw,FLOOR,'#0b0618');R(c,x+gw/2,20,2,FLOOR-20,'#150c26');for(let yy=40;yy<FLOOR-30;yy+=26)R(c,x+3,yy,gw-6,2,'#140b24');
    R(c,x+5,FLOOR-21,28,21,OUT);R(c,x+6,FLOOR-20,26,19,'#1f5240');R(c,x+5,FLOOR-23,30,4,'#2c7058');R(c,x+9,FLOOR-15,20,1,'#163b2e');R(c,x+9,FLOOR-10,20,1,'#163b2e');B.vents.push({x:x+gw/2,y:2});x+=gw;n=0;continue}
-  n++;const bw=rri(120,200),top=rri(16,56),base=rpick(['#26163f','#2b1848','#221339','#2e1b50']);
+  n++;const bw=rri(120,200),top=rri(6,30),base=rpick(['#26163f','#2b1848','#221339','#2e1b50']);
   R(c,x,top,bw,FLOOR-top,base);R(c,x,top,bw,3,'#3d2766');R(c,x,top,1,FLOOR-top,'#3a2560');R(c,x+bw-1,top,1,FLOOR-top,'#160c2a');
-  brickWall(c,x+1,top+3,bw-2,105-top,base);for(let k=4;k<bw-4;k+=6)R(c,x+k,top+3,3,2,'#33205a');
+  brickWall(c,x+1,top+3,bw-2,90-top,base);for(let k=4;k<bw-4;k+=6)R(c,x+k,top+3,3,2,'#33205a');
   const fire=rnd()<.45;
-  for(let wy=top+9;wy<100;wy+=19)for(let wx=x+9;wx<x+bw-14;wx+=17){const lit=rnd()<.45;winDetail(c,wx,wy,lit,rpick(['#a8407a','#3f8f9a','#b08a4a','#6a54b0']))}
-  if(fire){const fx=x+bw*.55|0;for(let wy=top+20;wy<100;wy+=19){R(c,fx,wy,bw*.35,1,'#0e0a1c');for(let k=0;k<bw*.35;k+=4)R(c,fx+k,wy-5,1,5,'#0e0a1c');seg2(c,fx+2,wy,fx+bw*.3,wy+18,'#0e0a1c')}}
-  if(rnd()<.6){const ax=x+rri(10,bw-24),ay=rri(top+12,92);R(c,ax-1,ay-1,14,10,OUT);R(c,ax,ay,12,8,'#5a5a72');for(let k=1;k<8;k+=2)R(c,ax+1,ay+k,10,1,'#3a3a4e');R(c,ax,ay,12,1,'#7a7a94');drip(c,ax+3,ay+9)}
+  for(let wy=top+9;wy<64;wy+=19)for(let wx=x+9;wx<x+bw-14;wx+=17){const lit=rnd()<.45;winDetail(c,wx,wy,lit,rpick(['#a8407a','#3f8f9a','#b08a4a','#6a54b0']))}
+  if(fire){const fx=x+bw*.55|0;for(let wy=top+20;wy<64;wy+=19){R(c,fx,wy,bw*.35,1,'#0e0a1c');for(let k=0;k<bw*.35;k+=4)R(c,fx+k,wy-5,1,5,'#0e0a1c');seg2(c,fx+2,wy,fx+bw*.3,wy+18,'#0e0a1c')}}
+  if(rnd()<.6){const ax=x+rri(10,bw-24),ay=rri(top+12,62);R(c,ax-1,ay-1,14,10,OUT);R(c,ax,ay,12,8,'#5a5a72');for(let k=1;k<8;k+=2)R(c,ax+1,ay+k,10,1,'#3a3a4e');R(c,ax,ay,12,1,'#7a7a94');drip(c,ax+3,ay+9)}
   if(rnd()<.55)pipeV(c,x+bw-6,top+4,FLOOR);
   // storefront
-  const sw=bw-20,signW=Math.min(sw,rri(50,100)),sx=x+(bw-signW)/2;R(c,sx-1,108,signW+2,16,'#3a2a5a');R(c,sx,109,signW,14,'#0e0819');
-  const opts=SHOPS.filter(t=>t.length*6<=signW-8);B.signs.push({x:sx+signW/2,y:113,t:rpick(opts),col:rpick(NEONS),fl:rnd()<.25,ph:rri(0,300),w:signW});
-  awning(c,x+6,125,bw-12);
-  const ww=Math.round(bw*.55);shopWindow(c,x+8,136,ww,42);
-  const dx=x+ww+14;door(c,dx,140);
-  {const fx=dx+22,fw=x+bw-fx-4;if(fw>12){for(let k=0;k<rri(1,3);k++)poster(c,fx+rri(0,fw-12),rri(140,158));if(rnd()<.6)graffiti(c,fx+rri(0,Math.max(1,fw-20)),rri(162,170))}}
-  if(rnd()<.5){const col=rpick(NEONS);B.signs.push({x:x+bw-6,y:60,t:'|',col,fl:false,ph:0,tube:true,h:60})}
+  const sw=bw-20,signW=Math.min(sw,rri(50,100)),sx=x+(bw-signW)/2;R(c,sx-1,74,signW+2,16,'#3a2a5a');R(c,sx,75,signW,14,'#0e0819');
+  const opts=SHOPS.filter(t=>t.length*6<=signW-8);B.signs.push({x:sx+signW/2,y:79,t:rpick(opts),col:rpick(NEONS),fl:rnd()<.25,ph:rri(0,300),w:signW});
+  R(c,x+1,90,bw-2,FLOOR-90,shd(base,-.08));brickWall(c,x+1,90,bw-2,FLOOR-90,shd(base,-.08));awning(c,x+6,93,bw-12);
+  const ww=Math.round(bw*.55);shopWindow(c,x+8,106,ww,72);
+  const dx=x+ww+14;door(c,dx,110);
+  {const fx=dx+30,fw=x+bw-fx-4;if(fw>12){for(let k=0;k<rri(1,3);k++)poster(c,fx+rri(0,fw-12),rri(112,140));if(rnd()<.6)graffiti(c,fx+rri(0,Math.max(1,fw-20)),rri(150,166))}}
+  if(rnd()<.5){const col=rpick(NEONS);B.signs.push({x:x+bw-6,y:20,t:'|',col,fl:false,ph:0,tube:true,h:62})}
   x+=bw}
  streetFloor(c,width);streetProps(c,width);
  B.near=near;return B}
@@ -54,11 +54,9 @@ function makeGarage(width){
  R(c,0,0,ww,H,'#22222d');for(let y=30;y<FLOOR;y+=22)R(c,0,y,ww,1,'#1b1b25');for(let xx=0;xx<ww;xx+=48)R(c,xx,24,1,FLOOR-24,'#1b1b25');speck(c,0,24,ww,FLOOR-24,'#2a2a36',ww*1.4);
  R(c,0,34,ww,4,'#3e3e52');R(c,0,34,ww,1,'#5a5a72');R(c,0,44,ww,3,'#4a3a3a');for(let xx=0;xx<ww;xx+=60){R(c,xx,32,3,16,'#2a2a38')}
  R(c,0,94,ww,6,'#a8862a');R(c,0,100,ww,1,'#6a5418');
- let k=1;for(let xx=20;xx<ww;xx+=92){textC(c,'B3-'+(k<10?'0':'')+k,xx+28,112,'#7a7a92',1,1);k++;
-  if(rnd()<.8){const col=rpick(['#7a1f3d','#1f4d7a','#c9a13b','#3a3a46','#2b6b4f','#5a2b7a','#b0b0c0']);const cx=xx+12,cy=184;
-   R(c,cx-1,cy-27,66,22,OUT);R(c,cx,cy-26,64,20,col);R(c,cx+12,cy-38,38,13,OUT);R(c,cx+13,cy-37,36,12,col);R(c,cx+16,cy-35,14,8,'#1a2a3a');R(c,cx+32,cy-35,14,8,'#1a2a3a');R(c,cx+17,cy-34,3,6,'#3a5a7a');
-   R(c,cx,cy-20,64,1,'#00000055');ell(c,cx+12,cy-6,6,5,'#0a0a0e');ell(c,cx+52,cy-6,6,5,'#0a0a0e');R(c,cx+62,cy-22,2,3,'#ff3b3b');R(c,cx,cy-22,2,3,'#ffe9a8');carDetail(c,cx,cy,col)}
-  if(rnd()<.25)B.exits.push({x:xx+60,y:60})}
+ let k=1;for(let xx=20;xx<ww;xx+=140){textC(c,'B3-'+(k<10?'0':'')+k,xx+56,106,'#7a7a92',1,1);k++;
+  if(rnd()<.8){const col=rpick(['#7a1f3d','#1f4d7a','#c9a13b','#3a3a46','#2b6b4f','#5a2b7a','#b0b0c0']);drawCar(c,xx+14,184,col)}
+  if(rnd()<.3)B.exits.push({x:xx+90,y:62})}
  garageWallDetail(c,ww);
  B.wall=wall;
  const [near,n]=mkCanvas(width,H);
@@ -69,7 +67,7 @@ function makeGarage(width){
   pillarDetail(n,px);R(n,px+6,70,16,12,'#d8d8e0');textC(n,'C'+(((px-130)/250)+1),px+14,72,'#22222d',1,1)}
  R(n,0,FLOOR,width,H-FLOOR,'#2a2a34');speck(n,0,FLOOR,width,H-FLOOR,'#34343f',width*2);speck(n,0,FLOOR,width,H-FLOOR,'#202029',width*1.5);
  for(let yy=FLOOR+20;yy<H;yy+=26)R(n,0,yy,width,1,'#24242d');
- for(let xx=0;xx<width;xx+=92){for(let t=0;t<40;t++){R(n,xx-t*.45,FLOOR+t,2,1,'#a8a8b8')}}
+ for(let xx=0;xx<width;xx+=140){for(let t=0;t<40;t++){R(n,xx-t*.45,FLOOR+t,2,1,'#a8a8b8')}}
  for(let xx=0;xx<width;xx+=40)R(n,xx,FLOOR+56,22,2,'#b08a22');
  for(let i=0;i<width/110;i++){const ox=rr(0,width),oy=rr(FLOOR+10,H-8);ell(n,ox,oy,rri(10,24),3,'#18181f');R(n,ox-4,oy-1,3,1,'#3a5a7a');R(n,ox,oy,3,1,'#6a3a7a');R(n,ox+3,oy-1,2,1,'#3a7a5a')}
  garageFloorDetail(n,width);

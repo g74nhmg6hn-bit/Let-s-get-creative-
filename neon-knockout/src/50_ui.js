@@ -103,7 +103,7 @@ function bar(x,y,w,h,v,ghost,col,col2){R(ctx,x-1,y-1,w+2,h+2,OUT);R(ctx,x,y,w,h,
 function drawHUD(){
  const p=G.player,L=G.L;
  R(ctx,5,5,22,22,OUT);R(ctx,6,6,20,20,'#1b1035');R(ctx,6,6,20,1,'#2de2e6');
- {const sv={...p,state:'idle',face:1,flash:0,weapon:null,pose:P0(),noSec:true,jatk:null};ctx.save();ctx.beginPath();ctx.rect(6,6,20,20);ctx.clip();const sc=RIGS.juno;drawRig(sv,15,60,null);ctx.restore()}
+ {const sv={...p,state:'idle',face:1,flash:0,weapon:null,pose:P0(),noSec:true,jatk:null};ctx.save();ctx.beginPath();ctx.rect(6,6,20,20);ctx.clip();const sc=RIGS.juno;drawRig(sv,14,95,null);ctx.restore()}
  text('JUNO',31,6,'#2de2e6',1,0,OUT);
  const low=p.hp<p.maxhp*.3&&(G.t>>3)%2;bar(31,15,118,6,p.hp/p.maxhp,G.hpGhost/p.maxhp,low?'#ff3b5c':'#2de2e6','#bffcff');
  text(String(Math.ceil(p.hp)),152,15,'#ffffff',1,0,OUT);

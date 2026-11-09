@@ -47,7 +47,7 @@ const RIGS={
  boss:{s:1.42,thigh:9,shin:9,torso:15,uarm:8,farm:7,lw:5,aw:5,tw:13,hr:5,deco:'crown',
   c:{skin:'#8a5a3e',skinD:'#5e3b28',top:'#6a1fb0',topD:'#43127a',pants:'#1e1428',pantsD:'#140d1c',shoe:'#d4a017',shoeD:'#8a6a10'}}
 };
-const OUT='#0c0614';for(const k in RIGS)RIGS[k].s*=1.35;
+const OUT='#0c0614';RIGS.boss.s=1.25;for(const k in RIGS)RIGS[k].s*=2.2;
 function P0(){return {ln:.08,cr:0,rot:0,hy:0,fa1:.6,fa2:2.5,ba1:.35,ba2:2.3,fl1:.3,fl2:.08,bl1:-.3,bl2:-.12}}
 const PKEYS=Object.keys(P0());
 const AP={

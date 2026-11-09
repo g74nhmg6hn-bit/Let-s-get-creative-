@@ -24,13 +24,15 @@ The owner is Brad, a solo developer. He's not a deep coder, so explain changes i
 | `60_main.js` | Fixed 60 Hz timestep loop, `resize()`, and the `window.NK` test hooks |
 
 ## How characters are drawn
-Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, torso, arms, head) posed by joint angles (`P0()` keys: `ln` lean, `cr` crouch, `rot` body rotation, `fa1/fa2` front arm, `ba1/ba2` back arm, `fl1/fl2` front leg, `bl1/bl2` back leg). Every frame, `targetPose(a)` picks a pose and the current pose eases toward it. Attack poses live in `AP[attackName] = [windup, strike]`. Rig sizes and base colors are in `RIGS` (`20_gfx.js`); all rigs are scaled by 1.35.
+Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, torso, arms, head) posed by joint angles (`P0()` keys: `ln` lean, `cr` crouch, `rot` body rotation, `fa1/fa2` front arm, `ba1/ba2` back arm, `fl1/fl2` front leg, `bl1/bl2` back leg). Every frame, `targetPose(a)` picks a pose and the current pose eases toward it. Attack poses live in `AP[attackName] = [windup, strike]`. Rig sizes and base colors are in `RIGS` (`20_gfx.js`); all rigs are scaled by 2.2 (the boss by 1.25 on top), so fighters stand about 90 px tall (the boss about 115), in the style of 16-bit arcade brawlers.
 
 `drawRig()` lives in `22_rig.js`. It rasterizes each body part pixel by pixel into an offscreen buffer, then copies it to the screen:
-- **Parts** are tapered capsules (`rcap`) with lighting from the upper front, using 5-tone color ramps (`RA()`: line, shadow, base, light, highlight, with shadows shifted toward purple and highlights toward warm yellow).
+- **Art style target:** classic 16-bit beat 'em up sprites: realistic heroic proportions, small heads, square shoulders, muscle bulges, near-black outlines, high-contrast shading in tight clusters, clothing folds.
+- **Parts** are tapered capsules (`rcap`, with an optional muscle bulge) with lighting from the upper front, using 5-tone color ramps (`RA()`: line, shadow, base, light, highlight, with shadows shifted toward purple and highlights toward warm yellow).
 - **Costume details** come from per-character material functions in `MAT` (stripes, belts, hoodie pocket and logo, armor plates, knee pads, knife straps, suit lapels, buttons and chain). A material gets `u` (pixels along the part), `v` (-1..1 across it, positive = front or up) and the shaded level, and returns `M(ramp, level)`.
-- **Body shape** for each character is set in `BUILD` (how thick the thighs, shins, arms and torso are).
-- **Heads** are hand-drawn pixel sprites in `HEADS` (facing right), with expression variants (`angry`, `hurt`, `happy`) that swap rows. `exprOf(a)` picks the expression.
+- **Body shape** for each character is set in `BUILD` (how thick the thighs, shins, arms and torso are). The torso is hips + a tapered chest + a shoulder yoke, so shoulders read square. `FOLDS()` adds cloth creases at knees, elbows and waist.
+- **Heads** are hand-drawn pixel sprites in `HEADS` (facing right), with expression variants (`angry`, `hurt`, `happy`) that swap rows. `exprOf(a)` picks the expression. `cx,cy` is the chin anchor and `up` the gap from the neck joint. `node test/heads.mjs` renders all heads at 10x to `test/shots/85-heads.png`.
+- **30 fps animation:** each character is re-rasterized every other frame and the cached image is reused in between (like arcade sprite animation), which halves the cost. Springy parts still simulate every frame.
 - **Springy parts** (`SEC` in `20_gfx.js`: ponytail, jacket tail, hood, scarf, cape) are drawn with the materials in `SECM`.
 - **Finishing pass** (`rend`): a 1px dark outline around the silhouette, a darker inner line wherever a part overlaps one behind it, and a neon rim light (`RIM`, set per stage theme) on the back edge.
 - `npm run test:stages` saves each stage background without actors to `test/shots/90-stage*.png`.
@@ -46,7 +48,7 @@ Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, tor
 ## Testing (self-play bot)
 - `npm test` builds the game, then `test/play.mjs` loads it headlessly in Playwright. A bot plays every stage and the boss, retries after deaths, saves screenshots to `test/shots/`, and prints stage times, HP, score, deaths and move stats (`NK.ST`). Set `DIFF=0|1|2` to test Easy, Normal or Hard.
 - `npm run test:ui`: menus, settings saving, pause, mouse, a **mocked gamepad**, and a phone-landscape touch test.
-- `npm run test:perf`: render time per frame for each stage (currently about 1–4 ms; the boss stage is the heaviest).
+- `npm run test:perf`: render time per frame for each stage (currently about 1.5–4 ms; the boss stage is the heaviest).
 - Set `CHROME=/path/to/chrome` if Playwright's bundled Chromium isn't installed.
 - Test hooks: `NK.manual=true` stops the real-time loop, `NK.step(n)` advances n ticks, `NK.render()`, `NK.bot` (runs after input polling), `NK.G` (game state).
 
