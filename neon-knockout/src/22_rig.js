@@ -31,7 +31,7 @@ const RBW=256,RBH=200,RAX=128,RAY=150;
 const rcv=document.createElement('canvas');rcv.width=RBW;rcv.height=RBH;const rctx=rcv.getContext('2d');
 const rimg=rctx.createImageData(RBW,RBH),rpx=new Uint32Array(rimg.data.buffer);
 const rcode=new Int32Array(RBW*RBH),rgid=new Uint8Array(RBW*RBH);
-let rx0,ry0,rx1,ry1,RF=1,RGID=0,RDIM=0;
+let rx0,ry0,rx1,ry1,RF=1,RGID=0,RDIM=0,RTGT=null,RLAST=null;
 const LX=.5,LY=-.7,LZ=.5;
 function rbegin(f){rx0=RBW;ry0=RBH;rx1=-1;ry1=-1;RF=f;RGID=0}
 function rgroup(dim){RGID++;RDIM=dim||0}
@@ -77,7 +77,8 @@ function rend(sx,sy,ov,noOutline){
    if(!back&&lv<4){const c=rp.c[lv],r=c&255,gg=(c>>8)&255,b=(c>>16)&255;rpx[i]=U32((r*2+rim[0])/3|0,(gg*2+rim[1])/3|0,(b*2+rim[2])/3|0);continue}}
   rpx[i]=rp.c[lv]}
  const w=X1-X0+1,h=Y1-Y0+1;rctx.putImageData(rimg,0,0,X0,Y0,w,h);
- ctx.drawImage(rcv,X0,Y0,w,h,sx-RAX+X0,sy-RAY+Y0,w,h);
+ if(RTGT){const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(rcv,X0,Y0,w,h,0,0,w,h);RLAST={c,ox:X0-RAX,oy:Y0-RAY}}
+ else ctx.drawImage(rcv,X0,Y0,w,h,sx-RAX+X0,sy-RAY+Y0,w,h);
  for(let y=Y0;y<=Y1;y++){rgid.fill(0,y*RBW+X0,y*RBW+X1+1);rpx.fill(0,y*RBW+X0,y*RBW+X1+1)}}
 
 // --- palettes ---------------------------------------------------------------
@@ -102,8 +103,8 @@ const MAT={
   thigh:(u,v,l,L)=>Math.abs(v+.05)<.2?M(PAL.juno.stripe,l):M(PAL.juno.pants,l),
   shin:(u,v,l,L)=>u>L-1.6?M(PAL.juno.pants,l-1):Math.abs(v+.05)<.2?M(PAL.juno.stripe,l):M(PAL.juno.pants,l),
   foot:(u,v,l,L,ny)=>ny>.45?M(PAL.juno.sole,l):(u<2&&v>.3)?M(PAL.juno.sole,2):M(PAL.juno.shoe,l+(u>L-1.5?1:0)),
-  pelvis:(u,v,l,L)=>u>L-2.2?(v>.55?M(PAL.juno.buck,3):M(PAL.juno.belt,l)):M(PAL.juno.pants,l),
-  torso:(u,v,l,L)=>{const k=u/L;if(k<.14)return M(PAL.juno.top,l);if(k<.22)return M(PAL.juno.jak,1);
+  pelvis:(u,v,l,L)=>Math.abs(v+.05)<.18?M(PAL.juno.stripe,l):M(PAL.juno.pants,l),
+  torso:(u,v,l,L)=>{const k=u/L;if(k<.07)return v>.5?M(PAL.juno.buck,3):M(PAL.juno.belt,l);if(k<.15)return M(PAL.juno.jak,1);
    if(v>.5&&k<.9)return v<.64?M(PAL.juno.jak,4):M(PAL.juno.top,l);if(k>.84&&v<.1)return M(PAL.juno.jak,l+1);if(k>.45&&k<.6&&v<-.35)return M(PAL.juno.stripe,2);return M(PAL.juno.jak,l)},
   uarm:(u,v,l,L)=>u>L-1.8?M(PAL.juno.jak,l+1):M(PAL.juno.jak,l),
   farm:(u,v,l,L)=>u>L-2.4?M(PAL.juno.tape,l):M(PAL.juno.skin,l),
@@ -178,7 +179,7 @@ const SECM={
 };
 // part radii (as fractions of the rig widths)
 const BUILD={
- juno:{th:[1.25,.85],sh:[.85,.7],ft:[.75,.6],ua:[1,.9],fa:[.9,.8],hd:1.15,to:[.4,.5],pv:.36},
+ juno:{th:[1.15,.85],sh:[.85,.7],ft:[.75,.6],ua:[1,.9],fa:[.9,.8],hd:1.15,to:[.38,.5],pv:.3},
  grunt:{th:[1.15,.85],sh:[.85,.8],ft:[.8,.7],ua:[1.2,1],fa:[1.05,.95],hd:1.2,to:[.45,.56],pv:.36},
  shield:{th:[1.1,.9],sh:[.95,.85],ft:[.85,.75],ua:[1.25,1],fa:[1,1],hd:1.15,to:[.46,.56],pv:.36},
  knife:{th:[1.2,.8],sh:[.8,.65],ft:[.7,.55],ua:[.9,.8],fa:[.85,.75],hd:1.1,to:[.38,.46],pv:.36},
@@ -349,3 +350,6 @@ function drawRig(a,sx,sy,ov,pose,noOutline){
  }
  return {hF:T(hF),head:T(head)};
 }
+
+// ghosts (afterimages) never change, so render each one once and reuse the image
+function ghostImg(a,col,pose,face){RTGT=1;RLAST=null;const f0=a.face;a.face=face;drawRig(a,0,0,col,pose,true);a.face=f0;RTGT=null;return RLAST}

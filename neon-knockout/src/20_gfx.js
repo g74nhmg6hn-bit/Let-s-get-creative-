@@ -158,7 +158,7 @@ function drawParts(cam){for(const p of parts){const x=Math.round(p.x-cam),y=Math
   case 'splinter':R(ctx,x,y,(p.life>>1)%2?3:1,(p.life>>1)%2?1:3,p.col);break;
   case 'star':{const r=Math.round(p.sz*(.6+k*.6));ctx.fillStyle=p.col;ctx.fillRect(x-r,y-1,r*2+1,3);ctx.fillRect(x-1,y-r,3,r*2+1);const d=Math.round(r*.55);for(let i=-d;i<=d;i++){ctx.fillRect(x+i,y+i,1,1);ctx.fillRect(x+i,y-i,1,1)}ctx.fillStyle='#fff';ctx.fillRect(x-2,y-2,5,5);break}
   case 'ring':ringPix(x,y,p.sz+(p.max-p.life)*2.5,(p.sz+(p.max-p.life)*2.5)*.4,p.col);break;
-  case 'ghost':ctx.globalAlpha=k*.45;drawRig(p.a,Math.round(p.x-cam),Math.round(FLOOR+p.y-p.z),p.col,p.pose,true);ctx.globalAlpha=1;break;
+  case 'ghost':{if(p.img===undefined)p.img=ghostImg(p.a,p.col,p.pose,p.face);if(p.img){ctx.globalAlpha=k*.45;ctx.drawImage(p.img.c,x+p.img.ox,y+p.img.oy);ctx.globalAlpha=1}break}
   case 'txt':ctx.globalAlpha=Math.min(1,k*2);text(p.s,x,y,p.col,p.sz,1,'#120a20');ctx.globalAlpha=1;break;
   case 'zap':{ctx.fillStyle=p.col;let px=x,py=y;for(let i=0;i<4;i++){const nx=px+rand(-3,3),ny=py+rand(-4,1);seg(px,py,nx,ny,1,p.col);px=nx;py=ny}break}
  }}}
