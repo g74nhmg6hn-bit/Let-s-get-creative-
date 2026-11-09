@@ -17,6 +17,7 @@ The owner is Brad, a solo developer. He's not a deep coder, so explain changes i
 | `10_audio.js` | Web Audio synthesis: `AU.sfx(name)` sound effects, and a step-sequencer music engine with `SONGS` (title, street, garage, boss, win). The audio unlocks on the first user gesture |
 | `20_gfx.js` | 5x7 bitmap font (`text`, `neon`), **character rigs** (`RIGS`, pose library `AP`, `targetPose`), props and pickups, particles (`P`, `sparks`, `hitFX`, `ghost`) |
 | `22_rig.js` | The character renderer `drawRig()`: color ramps, palettes (`PAL`), costume materials (`MAT`), body builds (`BUILD`), pixel heads (`HEADS`) |
+| `24_parts.js` | Hand-drawn pixel parts attached to the skeleton: fists (`FIST_SIDE` for punches, `FIST_FRONT` for a raised guard), footwear (`BOOT`, `BOOT_BIG`) that rotates with the foot, chest costume pieces (`DECALS`), and their per-character palettes (`initParts`) |
 | `30_bg.js` | Procedural parallax backgrounds for each theme (`street`, `garage`, `roof`) plus live layers: neon signs, flicker, rain, lights |
 | `32_bgdetail.js` | Extra background detail painted once per stage: bricks, windows, awnings, shop displays, posters, street props, cables, garage pipes and cars, rooftop vents and gravel |
 | `40_game.js` | Game data and logic: `LEVELS` (waves and props), `TYPES` (enemy stats), `ATK` (every attack's frames, damage, knockback, hit-stop), `damage()`, player controller, enemy AI, boss AI, projectiles, level and wave flow, results and rank |
@@ -32,6 +33,8 @@ Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, tor
 - **Costume details** come from per-character material functions in `MAT` (stripes, belts, hoodie pocket and logo, armor plates, knee pads, knife straps, suit lapels, buttons and chain). A material gets `u` (pixels along the part), `v` (-1..1 across it, positive = front or up) and the shaded level, and returns `M(ramp, level)`.
 - **Body shape** for each character is set in `BUILD` (how thick the thighs, shins, arms and torso are). The torso is hips + a tapered chest + a shoulder yoke, so shoulders read square. `FOLDS()` adds cloth creases at knees, elbows and waist.
 - **Heads** are hand-drawn pixel sprites in `HEADS` (facing right), with expression variants (`angry`, `hurt`, `happy`) that swap rows. `exprOf(a)` picks the expression. `cx,cy` is the chin anchor and `up` the gap from the neck joint. `node test/heads.mjs` renders all heads at 10x to `test/shots/85-heads.png`.
+- **Hand-drawn parts** (`24_parts.js`) replace the generated fists and feet and add chest pieces (Grunt's logo and drawstrings, Riot Wall's badge, Needle's knife bandolier, the Baron's gold chain and medallion, Juno's star patch). Back-side limbs use a darker palette (`.d`).
+- Torso materials get `v` positive toward the character's front.
 - **30 fps animation:** each character is re-rasterized every other frame and the cached image is reused in between (like arcade sprite animation), which halves the cost. Springy parts still simulate every frame.
 - **Springy parts** (`SEC` in `20_gfx.js`: ponytail, jacket tail, hood, scarf, cape) are drawn with the materials in `SECM`.
 - **Finishing pass** (`rend`): a 1px dark outline around the silhouette, a darker inner line wherever a part overlaps one behind it, and a neon rim light (`RIM`, set per stage theme) on the back edge.

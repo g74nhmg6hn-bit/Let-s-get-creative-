@@ -52,8 +52,8 @@ function rcap(ax,ay,bx,by,r0,r1,mat,bg){
   const v=(qx*px+qy*py)/Math.max(.5,r),nl=v*k+Math.sqrt(Math.max(0,1-v*v))*LZ;
   const ny=v*py;rput(x,y,mat(tc*L,v,lvlOf(nl,0)-RDIM,L,ny,nl))}}}
 // hand-drawn sprite: rows of chars, pal maps char -> code (or fn). anchor (cx,cy) in sprite = buffer (x,y)
-function rspr(rows,pal,cx,cy,x,y,ang){
- const w=rows[0].length,h=rows.length;if(Math.abs(ang)<.22)ang=0;
+function rspr(rows,pal,cx,cy,x,y,ang,snap){
+ const w=rows[0].length,h=rows.length;if(Math.abs(ang)<(snap===undefined?.22:snap))ang=0;
  if(!ang){const X=Math.floor(x),Y=Math.floor(y);for(let gy=0;gy<h;gy++){const row=rows[gy];for(let i=-w;i<=w;i++){const gx=Math.floor((i+.5)*RF+cx);if(gx<0||gx>=w)continue;const ch=row[gx];if(ch==='.')continue;
    const c=pal[ch];if(c!==undefined)rput(X+i,Y+gy-Math.floor(cy),c)}}return}
  const cr=Math.cos(ang),sr=Math.sin(ang),R2=Math.ceil(Math.hypot(w,h)/2+2);
@@ -160,11 +160,15 @@ const MAT={
   shin:(u,v,l,L)=>u>L-4.5?(u<L-3.5?M(PAL.boss.gold,4):M(PAL.boss.boot,l)):M(PAL.boss.pants,l+(Math.abs(v-.4)<.12?1:0)),
   foot:(u,v,l,L,ny)=>ny>.4?M(PAL.boss.gold,1):M(PAL.boss.boot,l+(u>L-2&&ny<0?1:0)),
   pelvis:(u,v,l,L)=>u>L-2.8?(v>.45?M(PAL.boss.gold,l+1):M(PAL.boss.shirt,l)):M(PAL.boss.pants,l),
-  torso:(u,v,l,L)=>{const k=u/L;
-   if(v>.25&&v<.62&&k>.2)return (v<.33?M(PAL.boss.lapel,1):(k>.55?M(PAL.boss.shirt,l):M(PAL.boss.lapel,l)));
-   if(v>=.62&&k>.25&&k<.75){const bt=(k-.25)/.5*3;if(Math.abs(bt-Math.round(bt))<.14&&v>.7&&v<.9)return M(PAL.boss.gold,4)}
-   if(k>.6&&k<.86&&Math.abs(v-(k-.6)*2.2)<.12)return M(PAL.boss.gold,(u|0)%2?4:2);
-   if(k<.12)return M(PAL.boss.suit,l-1);return M(PAL.boss.suit,l)},
+  torso:(u,v,l,L)=>{const k=u/L,P=PAL.boss;
+   if(k<.1)return Math.abs(v-.55)<.16?M(P.gold,(u|0)%2?4:3):M(P.shirt,l);                 // belt + buckle
+   const vn=.62-(1-k)*1.1;                                                                // V-neck edge moving toward the front as it goes down
+   if(k>.5&&v>vn+.18)return M(PAL.boss.fur,Math.max(2,l));            // shirt in the V
+   if(k>.5&&v>vn+.06)return M(P.gold,3);                                                  // gold lapel trim
+   if(k>.4&&v>vn-.14)return M(P.lapel,Math.max(1,l-(v<vn?1:0)));                          // lapel
+   if(k>.16&&k<.5&&v>.62&&v<.86){const bt=(k-.16)/.34*3;if(Math.abs(bt-Math.round(bt))<.16)return M(P.gold,4)}  // buttons
+   if(k>.16&&k<.5&&Math.abs(v-.55)<.05)return M(P.lapel,1);                               // button seam
+   if(k<.16)return M(P.suit,l-1);return M(P.suit,l)},
   uarm:(u,v,l,L)=>u<1.6&&v>0?M(PAL.boss.gold,3):M(PAL.boss.suit,l-(v<-.3?1:0)),
   farm:(u,v,l,L)=>u>L-2.6?M(PAL.boss.fur,l):M(PAL.boss.suit,l),
   hand:(u,v,l)=>M(PAL.boss.skin,l),
@@ -237,65 +241,68 @@ const HEADS={
   pal:()=>{const P=PAL.grunt;return {'1':M(P.hood,0),'2':M(P.hood,1),'3':M(P.hood,2),'4':M(P.hood,3),a:M(P.skin,0),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),s:M(P.stub,2),
    W:M(P.eye,2),p:M(P.pup,2),m:M(P.mouth,2)}},
   ex:{angry:{8:'12333abbaacaaaa',9:'12333bbpacaaWpd',14:'1223bssssmmmms.'},hurt:{9:'12333bbaaccaaad',14:'1223bsssmmmsss.'},happy:{9:'12333bbaaccaaad',14:'1223bssmmmmmss.'}}},
- shield:{cx:8,cy:12,up:3,r:7,nr:3.6,rows:[
-  '....4555554....',
-  '..34455555443..',
-  '.3344444444443.',
-  '233333333333334',
-  '233333333333333',
-  '2233gggggggGGG3',
-  '2233ggggggGGGGg',
-  '22233333333333.',
-  '2223333bccccccd',
-  '2222333bcccccc.',
-  '.222213bccc&cc.',
-  '..2221.bbcccb..',
-  '.......bbbb....'],
-  pal:()=>{const P=PAL.shield;return {'1':M(P.helm,0),'2':M(P.helm,1),'3':M(P.helm,2),'4':M(P.helm,3),'5':M(P.helm,4),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),'&':M(P.mouth,2),g:M(P.visor,2),G:M(P.visor2,2)}},
-  ex:{angry:{5:'2233xxxxxxxXXX3',6:'2233xxxxxxXXXXx',10:'.222213bcc&&c.'}},angryPal:()=>({x:M(PAL.shield.visorA,2),X:M(PAL.shield.visorA2,2)})},
- knife:{cx:6,cy:14,up:3,r:6,nr:2.4,rows:[
-  '......45....',
-  '.....3453...',
-  '.....3443...',
-  '....33443...',
-  '...2333432..',
-  '..2bbbbbbb..',
-  '.2bcccccccd.',
-  '.2bccaaccaa.',
-  '.2bgggggGGGg',
-  '.2bcggggggc.',
-  '.2bbcccccccd',
-  '..2bccccccb.',
-  '..2bcccc&&c.',
-  '...bbcccccb.',
-  '....bbcccb..',
-  '.....bbb....'],
+ shield:{cx:9,cy:13,up:3,r:7,nr:3.6,rows:[
+  '.....3455543...',
+  '...234444455432',
+  '..2334444444554',
+  '.12333344444443',
+  '.12333333333333',
+  '122332ggggggggG',
+  '12233gggggGGGGG',
+  '122331111111111',
+  '12223kbcccccccd',
+  '1222kbcccccccdd',
+  '1222kbccccccbcd',
+  '.122kbbcccc&&c.',
+  '..12kbbcccccc..',
+  '...1k.bbbbbb...',
+  '....kk.........'],
+  pal:()=>{const P=PAL.shield;return {'1':M(P.helm,0),'2':M(P.helm,1),'3':M(P.helm,2),'4':M(P.helm,3),'5':M(P.helm,4),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),'&':M(P.mouth,2),g:M(P.visor,2),G:M(P.visor2,2),k:M(P.belt,2)}},
+  ex:{angry:{5:'122332xxxxxxxxX',6:'12233xxxxxXXXXX',11:'.122kbbccc&&&c.'},hurt:{11:'.122kbbccc&cc..'}},angryPal:()=>({x:M(PAL.shield.visorA,2),X:M(PAL.shield.visorA2,2)})},
+ knife:{cx:7,cy:15,up:3,r:6,nr:2.4,rows:[
+  '......5......',
+  '......45.....',
+  '.....345.....',
+  '.....3443....',
+  '....23443....',
+  '...223433....',
+  '..bb2233bbb..',
+  '.bbcc2c2cccd.',
+  '.bcccccccccdd',
+  '.bcgggggggGGg',
+  '.bcggggggGGg.',
+  '.bbccccccccdd',
+  '.bacccccccbcd',
+  '..bacccccbb..',
+  '..bbcccc&&c..',
+  '...bbcccccb..',
+  '....bbbbbb...'],
   pal:()=>{const P=PAL.knife;return {'2':M(P.hawk,1),'3':M(P.hawk,2),'4':M(P.hawk,3),'5':M(P.hawk,4),a:M(P.skin,0),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),'&':M(P.mouth,2),g:M(P.visor,2),G:M(P.visor2,2)}},
-  ex:{angry:{12:'..2bccc&&&c.'},hurt:{12:'..2bcccc&cc.'},happy:{12:'..2bcc&&&&c.'}}},
- boss:{cx:9,cy:18,up:4,r:9,nr:4.5,rows:[
-  '.....g...g...g....',
-  '....gGg.gRg.gGg...',
-  '....ggggggggggggg.',
-  '....GGGGGGGGGGGGG.',
-  '....ggggggggggggg.',
-  '...bbbbbbbbbbbbbbb',
-  '..bbcccccccccccccd',
-  '.bbcccccccccccccdd',
-  '.bccccaaaaccaaaaac',
-  '.bcccc##ecccc##ecd',
-  '.abccccccccccccccd',
-  '.abccccccccccbcccc',
-  '.aabcccccccccbbccd',
-  '.aaazzzzzzzzzzzzzz',
-  '..aazzzzzttttzzzzz',
-  '..aazzzzzzzzzzzzz.',
-  '...azzzzzzzzzzzzz.',
-  '....zzzzzzzzzzzz..',
-  '.....zzzzzzzzzz...',
-  '......zzzzzzzz....',
-  '........zzzz......'],
-  pal:()=>{const P=PAL.boss;return {g:M(P.gold,2),G:M(P.gold,4),R:M(P.gem,2),a:M(P.skin,0),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),'#':M(P.shade,2),e:M(P.eye,2),z:M(P.beard,2),t:M(P.teeth,2)}},
-  ex:{angry:{8:'.bccccaaaaaaaaaaac',9:'.bcccca##ecca##ecd',14:'..aazzzzttttttzzzz'},hurt:{9:'.bcccc###cccc###cd',14:'..aazzzzzzttzzzzzz'},happy:{14:'..aazzzzttttttttzz'}}}
+  ex:{angry:{14:'..bbccc&&&c..'},hurt:{14:'..bbcccc&cc..'},happy:{14:'..bbcc&&&&c..'}}},
+ boss:{cx:10,cy:19,up:4,r:9,nr:4.5,rows:[
+  '......g...g...g....',
+  '.....gGg.gRg.gGg...',
+  '.....gggggggggggg..',
+  '.....GGGGGGGGGGGG..',
+  '.....gyyyyyyyyyyg..',
+  '....bbbbbbbbbbbbbb.',
+  '...bbccccccccccccd.',
+  '..bbcccccccccccccdd',
+  '..bcccaaaaacaaaaaac',
+  '..bccc##eecc##eecd.',
+  '..abcccccccccccccdd',
+  '.aabccccccccccbcccd',
+  '.aabcccccccccbbbccd',
+  '.aaazzzzZzzzzzzzzzz',
+  '..aazzzzzttttTzzzzz',
+  '..aazzZzzzzzzzzZzz.',
+  '...azzzzzzZzzzzzzz.',
+  '....zzzZzzzzzzZzz..',
+  '.....zzzzzzZzzzz...',
+  '......zzzzzzzzz....',
+  '........zzzzz......'],
+  pal:()=>{const P=PAL.boss;return {g:M(P.gold,2),G:M(P.gold,4),y:M(P.gold,1),T:M(P.gold,4),R:M(P.gem,2),a:M(P.skin,0),b:M(P.skin,1),c:M(P.skin,2),d:M(P.skin,3),'#':M(P.shade,2),e:M(P.eye,2),z:M(P.beard,2),Z:M(P.beard,3),t:M(P.teeth,2)}},
+  ex:{angry:{8:'..bcccaaaaaaaaaaaac',9:'..bccca##eeca##eecd',14:'..aazzzttttttTzzzz'},hurt:{9:'..bccc####cc####cd.',14:'..aazzzzzzzttzzzzz'},happy:{14:'..aazzzttttttTttzz'}}}
 };
 for(const k in MAT){const m=MAT[k];m.thigh=FOLDS(m.thigh,[.5,-4]);m.shin=FOLDS(m.shin,[3,.55]);m.uarm=FOLDS(m.uarm,[-3]);m.farm=FOLDS(m.farm,[2.5]);m.torso=FOLDS(m.torso,[.18,.32])}
 for(const k in HEADS){const H=HEADS[k];H.P=H.pal();if(H.angryPal)Object.assign(H.P,H.angryPal());H.exr={};for(const e in H.ex){const r=H.rows.slice();for(const j in H.ex[e])r[j]=H.ex[e][j];H.exr[e]=r}}
@@ -316,12 +323,17 @@ function drawRig(a,sx,sy,ov,pose,noOutline){
  const cr=Math.cos(p.rot),sr=Math.sin(p.rot);
  const T=q=>{const x=q[0],y=q[1]-hipY;return [sx+(x*cr-y*sr)*f,sy+(x*sr+y*cr)+hipY+p.hy]};
  const B=q=>{const t=T(q);return [t[0]-sx+RAX,t[1]-sy+RAY]};
- const mat=MAT[type],bd=BUILD[type];
+ if(!PARTS)initParts();const mat=MAT[type],bd=BUILD[type];
  const ext=(A,Bq,k)=>[Bq[0]+(Bq[0]-A[0])*k,Bq[1]+(Bq[1]-A[1])*k];
  const cap=(A,Bq,r0,r1,m,bg)=>{const a1=B(A),b1=B(Bq);rcap(a1[0],a1[1],b1[0],b1[1],r0,r1,m,bg)};
  const limbArm=(sh0,el,ha)=>{const hr2=aw*.46;cap(sh0,el,aw*bd.ua[0]/2+.3,aw*bd.ua[1]/2,mat.uarm,[aw*.16,.45,.5]);cap(el,ha,aw*bd.fa[0]/2,aw*bd.fa[1]/2,mat.farm,[aw*.14,.25,.45]);
-  const he=ext(el,ha,(hr2*.9)/Math.max(1,Math.hypot(ha[0]-el[0],ha[1]-el[1])));cap(ha,he,hr2+.4,hr2+.2,mat.hand)};
- const limbLeg=(k,ft,to2)=>{cap(hip,k,lw*bd.th[0]/2,lw*bd.th[1]/2,mat.thigh,[lw*.1,.3,.6]);cap(k,ft,lw*bd.sh[0]/2,lw*bd.sh[1]/2,mat.shin,[lw*.14,.28,.4]);cap(ft,to2,lw*bd.ft[0]/2+.3,lw*bd.ft[1]/2,mat.foot)};
+  const PT=PARTS[type];if(PT&&PT.fist){const e1=B(el),h1=B(ha),dx=h1[0]-e1[0],dy=h1[1]-e1[1],L=Math.hypot(dx,dy)||1,pal=RDIM?PT.fist.d:PT.fist.p;
+   if(dy<-.62*L)rspr(FIST_FRONT.rows,pal,FIST_FRONT.cx,FIST_FRONT.cy,h1[0]+dx/L*2,h1[1]+dy/L*2,0);
+   else{const an=Math.atan2(dy,dx*RF);rspr(FIST_SIDE.rows,pal,FIST_SIDE.cx,FIST_SIDE.cy,h1[0]-dx/L,h1[1]-dy/L,Math.abs(an)<.3?0:an,0)}}
+  else{const he=ext(el,ha,(hr2*.9)/Math.max(1,Math.hypot(ha[0]-el[0],ha[1]-el[1])));cap(ha,he,hr2+.4,hr2+.2,mat.hand)}};
+ const limbLeg=(k,ft,to2)=>{cap(hip,k,lw*bd.th[0]/2,lw*bd.th[1]/2,mat.thigh,[lw*.1,.3,.6]);cap(k,ft,lw*bd.sh[0]/2,lw*bd.sh[1]/2,mat.shin,[lw*.14,.28,.4]);
+  const PT=PARTS[type];if(PT&&PT.boot){const a1=B(ft),b1=B(to2),an=Math.atan2(b1[1]-a1[1],(b1[0]-a1[0])*RF),S=PT.bigBoot?BOOT_BIG:BOOT;rspr(S.rows,RDIM?PT.boot.d:PT.boot.p,S.cx,S.cy,a1[0],a1[1],Math.abs(an)<.3?0:an,0)}
+  else cap(ft,to2,lw*bd.ft[0]/2+.3,lw*bd.ft[1]/2,mat.foot)};
  // secondary motion parts (behind everything); springs update every frame
  const secs=(!noOutline&&!a.noSec&&SEC[type])||[],secR=[];
  const skull=[head[0],head[1]-(HH.cy-HH.rows.length*.42)];const anchors={head:skull,waist,shB,neck};
@@ -343,8 +355,9 @@ function drawRig(a,sx,sy,ov,pose,noOutline){
  rgroup();limbLeg(kF,fF,tF);
  rgroup();cap([hip[0],hip[1]+1],waist,tw*bd.pv,tw*(bd.pv+.06),mat.pelvis);
  {const r1=tw*bd.to[1],sl=r1*.75,top=[neck[0]-Math.sin(p.ln)*sl,neck[1]+Math.cos(p.ln)*sl],Lt=Math.hypot(neck[0]-waist[0],neck[1]-waist[1]);
-  cap(waist,top,tw*bd.to[0],r1,(u,v,l,L,ny)=>mat.torso(u*Lt/Math.max(1,L),v,l,Lt,ny));
-  const yk=(u,v,l)=>mat.uarm(.5,v,l,20);const yr=r1*.55;cap([shB[0]+1,shB[1]+yr*.2],[shF[0]-1,shF[1]+yr*.2],yr,yr*.95,yk)}
+  cap(waist,top,tw*bd.to[0],r1,(u,v,l,L,ny)=>mat.torso(u*Lt/Math.max(1,L),-v,l,Lt,ny));
+  const yk=(u,v,l)=>mat.uarm(.5,v,l,20);const yr=r1*.55;cap([shB[0]+1,shB[1]+yr*.2],[shF[0]-1,shF[1]+yr*.2],yr,yr*.95,yk);
+  const DC=DECALS[type],PT=PARTS[type];if(DC&&PT&&PT.decal){const cq=B(chest),an=p.ln+p.rot;rspr(DC.rows,PT.decal.p,DC.cx,DC.cy,cq[0],cq[1],Math.abs(an)<.15?0:an,0)}}
  if(type==='boss'){const sb=B(shB),sf=B(shF);rcap(sb[0]-1,sb[1]-2,sf[0],sf[1]-1,aw*.5,aw*.42,(u,v,l)=>M(PAL.boss.fur,l+(v>.3?1:0)))}
  rgroup();const nk=B(neck),hd=B(head);rcap(nk[0],nk[1]+1,lerp(nk[0],hd[0],.6),lerp(nk[1],hd[1],.6),HH.nr||hr*.42,HH.nr||hr*.42,mat.neck);
  const H=HH,ex=exprOf(a);rspr(H.exr[ex]||H.rows,H.P,H.cx,H.cy,hd[0],hd[1],p.rot+(Math.abs(p.ln)>.3?p.ln*.5:0));
