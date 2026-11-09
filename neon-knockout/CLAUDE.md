@@ -47,6 +47,6 @@ Last balance check: on Normal the bot clears both stages and loses to the boss a
 
 ## Ideas / next steps
 - Give each enemy type a stronger silhouette of its own (bulkier grunt, lankier Needle, more heavily armored Riot Wall).
-- Sprite Fusion MCP (a tilemap editor) is available to connect: `claude mcp add --transport http spritefusion https://www.spritefusion.com/mcp`. Possible use: hand-built tile layouts for the stage backgrounds, replacing the code-generated ones in `30_bg.js`. First check what its tools can do and what format they export.
+- Sprite Fusion MCP (a tilemap editor) is configured for this repo in `.mcp.json` at the repo root (Claude Code asks you to approve it the first time). Possible use: hand-built tile layouts for the stage backgrounds, replacing the code-generated ones in `30_bg.js`. First check what its tools can do and what format they export.
 - More content: a stage between the garage and the rooftop, more enemy types, co-op.
 - Published preview (Claude artifact): https://claude.ai/artifact/V2YHdGzJ3yWaAdpXgP3YPN
