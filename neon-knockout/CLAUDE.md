@@ -18,6 +18,7 @@ The owner is Brad, a solo developer. He's not a deep coder, so explain changes i
 | `20_gfx.js` | 5x7 bitmap font (`text`, `neon`), **character rigs** (`RIGS`, pose library `AP`, `targetPose`), props and pickups, particles (`P`, `sparks`, `hitFX`, `ghost`) |
 | `22_rig.js` | The character renderer `drawRig()`: color ramps, palettes (`PAL`), costume materials (`MAT`), body builds (`BUILD`), pixel heads (`HEADS`) |
 | `30_bg.js` | Procedural parallax backgrounds for each theme (`street`, `garage`, `roof`) plus live layers: neon signs, flicker, rain, lights |
+| `32_bgdetail.js` | Extra background detail painted once per stage: bricks, windows, awnings, shop displays, posters, street props, cables, garage pipes and cars, rooftop vents and gravel |
 | `40_game.js` | Game data and logic: `LEVELS` (waves and props), `TYPES` (enemy stats), `ATK` (every attack's frames, damage, knockback, hit-stop), `damage()`, player controller, enemy AI, boss AI, projectiles, level and wave flow, results and rank |
 | `50_ui.js` | Scenes (title, how to play, settings, scores, credits, play, results), menus, pause, HUD, `render()` |
 | `60_main.js` | Fixed 60 Hz timestep loop, `resize()`, and the `window.NK` test hooks |
@@ -32,6 +33,7 @@ Characters are **not sprite sheets**. Each one is a skeleton rig (hip, legs, tor
 - **Heads** are hand-drawn pixel sprites in `HEADS` (facing right), with expression variants (`angry`, `hurt`, `happy`) that swap rows. `exprOf(a)` picks the expression.
 - **Springy parts** (`SEC` in `20_gfx.js`: ponytail, jacket tail, hood, scarf, cape) are drawn with the materials in `SECM`.
 - **Finishing pass** (`rend`): a 1px dark outline around the silhouette, a darker inner line wherever a part overlaps one behind it, and a neon rim light (`RIM`, set per stage theme) on the back edge.
+- `npm run test:stages` saves each stage background without actors to `test/shots/90-stage*.png`.
 - `npm run test:chars` saves close-up lineups of every character in several poses to `test/shots/80-chars-*.png` (set `POSES=idle,hurt,...`).
 
 ## Combat model (key facts)
